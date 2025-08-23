@@ -7,16 +7,10 @@ A comprehensive 8-stage, guard-railed AI development framework for building robu
 ```
 aipp/
 ├── README.md                        # This file
-roadmap
 ├── SECURITY.md                     # Security guidelines and best practices
 │
 ├── templates/                      # Stage-specific templates
-│   ├── PRD.template.md            # Product Requirements Document template
-│   ├── ThoughtExperiment.template.md  # Solution exploration template
-│   ├── InterfacePact.template.ts  # Interface contract template
-│   ├── UnitTestPlan.template.md   # Unit testing strategy template
-│   ├── IntegrationTestPlan.template.md # Integration testing template
-│   └── ADR.template.md            # Architecture Decision Record template
+│   └── PRD.template.md            # Product Requirements Document template
 │
 ├── guides/                        # Implementation guides
 │   ├── GETTING_STARTED.md        # Quick start guide
@@ -29,45 +23,42 @@ roadmap
 │   ├── AuditTrailSystem.md       # Audit and tracking system
 │   └── PerformanceAndSecurity.md # Stage 8 optimization tools
 │
-├── prompts/                      # AI prompt templates
-│   ├── ai_generation_prompt.md   # Code generation prompts
-│   ├── test_only_prompt.md       # Test generation prompts
-│   ├── refactor_prompt.md        # Refactoring prompts
-│   ├── red_team_prompt.md        # Security testing prompts
-│   └── migration_prompt.md       # Migration prompts
-│
-└── examples/                     # Example implementations
-    └── server/                   # Node.js/Express example
-        ├── package.json
-        ├── src/                  # Source code
-        └── tests/                # Test examples
+└── prompts/                      # AI prompt templates for each stage
+    ├── thought-experiment.prompt.md             # Stage 1: Thought Experiment
+    ├── planning.prompt.md                       # Stage 2: Planning
+    ├── interface-freeze.prompt.md               # Stage 3: Interface Freeze
+    ├── unit-test-generation.prompt.md           # Stage 4: Unit Test Generation
+    ├── code-generation.prompt.md                # Stage 5: Implementation
+    ├── integration-test-generation.prompt.md    # Stage 6: Integration Tests
+    ├── integration-implementation.prompt.md     # Stage 7: Integration Implementation
+    └── performance-security-hardening.prompt.md # Stage 8: Performance & Security
 ```
 
 ## 🚀 8-Stage Development Process
 
-### Stage 1: Product Requirements Document (PRD)
-Define clear business requirements with validation checklist and risk assessment.
+### Stage 1: Thought Experiment
+Define clear business requirements and explore multiple architectural solutions through rigorous thought experiments. Conduct scenario analysis, risk assessment, and make final architecture selection.
 
-### Stage 2: Thought Experiment
-Explore solution options with decision matrix and architecture analysis.
+### Stage 2: Planning  
+Generate multiple architectural approaches with detailed trade-off analysis. Create complete specifications including API design, database schema, and implementation roadmap.
 
 ### Stage 3: Interface Freeze
-Lock public interfaces with automated change detection and contract testing.
+Transform finalized architecture into frozen, documented interfaces with comprehensive type definitions. Create API contracts, database schemas, and service interfaces that serve as implementation contracts.
 
-### Stage 4: Unit Test Development
-Write comprehensive unit tests with mutation testing and property-based testing.
+### Stage 4: Unit Test Generation
+Generate comprehensive unit test suites for all frozen interfaces. Create table-driven tests, mocks, fixtures, and test utilities ensuring 100% interface compliance.
 
-### Stage 5: Implementation
-Implement code to pass all unit tests following TDD principles.
+### Stage 5: Code Generation
+Implement production-ready code following TDD principles. Generate complete implementation that passes all unit tests while adhering to frozen interfaces from Stage 3.
 
-### Stage 6: Integration Test Development
-Create integration tests with testcontainers and mock services.
+### Stage 6: Integration Test Generation  
+Create comprehensive integration test suites validating end-to-end functionality, database operations, external services, and complete user workflows.
 
 ### Stage 7: Integration Implementation
-Complete integration to pass all integration tests.
+Iteratively enhance implementation to pass ALL integration tests while maintaining 100% unit test compliance. Fix integration issues without breaking existing functionality.
 
 ### Stage 8: Performance & Security Hardening
-Optimize performance and apply security hardening with automated tools.
+Conduct comprehensive performance optimization and security hardening. Ensure scalability readiness, eliminate inefficiencies, and validate SLA compliance with automatic flagging of unresolvable issues.
 
 ## ⚡ Quick Start
 
@@ -78,17 +69,10 @@ Optimize performance and apply security hardening with automated tools.
    ```
 
 2. **Start with a feature:**
-   - Begin with `templates/PRD.template.md`
-   - Progress through each stage systematically
-   - Use the appropriate templates and guides
-
-3. **Run the example (optional):**
-   ```bash
-   cd examples/server
-   npm install
-   npm run test:unit
-   npm run test:int
-   ```
+   - Begin with `templates/PRD.template.md` for requirements definition
+   - Use `prompts/thought-experiment.prompt.md` for Stage 1
+   - Progress through each stage systematically using the corresponding prompts
+   - Follow the 8-stage process in sequence
 
 ## 🔑 Key Features
 
@@ -172,19 +156,29 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 
 ## 📚 Documentation
 
+### Core Documentation
 - **[Getting Started Guide](guides/GETTING_STARTED.md)**: Step-by-step setup instructions
 - **[Operational Tooling](guides/OperationalTooling.md)**: Production deployment guide
 - **[Troubleshooting](guides/TROUBLESHOOTING.md)**: Common issues and solutions
 - **[Security Guidelines](SECURITY.md)**: Security best practices
-- **[Gap Analysis](GAPS_AND_RECOMMENDATIONS.md)**: Framework improvements roadmap
+
+### Stage-Specific Prompts
+- **[Stage 1 Prompt](prompts/thought-experiment.prompt.md)**: Thought experiment and requirement analysis
+- **[Stage 2 Prompt](prompts/planning.prompt.md)**: Architecture planning and specification
+- **[Stage 3 Prompt](prompts/interface-freeze.prompt.md)**: Interface definition and freezing
+- **[Stage 4 Prompt](prompts/unit-test-generation.prompt.md)**: Unit test generation
+- **[Stage 5 Prompt](prompts/code-generation.prompt.md)**: Implementation generation
+- **[Stage 6 Prompt](prompts/integration-test-generation.prompt.md)**: Integration test generation
+- **[Stage 7 Prompt](prompts/integration-implementation.prompt.md)**: Integration implementation
+- **[Stage 8 Prompt](prompts/performance-security-hardening.prompt.md)**: Performance and security optimization
 
 ## 🤝 Contributing
 
 To contribute to the AIPP framework:
-1. Review the gap analysis document
-2. Follow the 8-stage process for any changes
-3. Ensure all quality gates pass
-4. Update relevant documentation
+1. Follow the 8-stage process for any changes
+2. Ensure all quality gates pass
+3. Update relevant documentation
+4. Test prompts thoroughly before submission
 
 ## 📄 License
 
