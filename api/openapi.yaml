@@ -1,0 +1,722 @@
+openapi: 3.1.0
+info:
+  title: Todo API
+  version: 1.0.0
+  description: Production-grade todo management API with authentication and task management
+  contact:
+    name: API Support
+    email: api-support@company.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://staging-api.company.com/api
+    description: Staging environment
+  - url: https://api.company.com/api
+    description: Production environment
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/auth/signup:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      description: Create a new user account with email and password
+      operationId: signup
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: Valid email address
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 128
+                  pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$
+                  example: MyPassword123
+                  description: Password with at least 8 characters, one uppercase, one lowercase, and one number
+            examples:
+              valid_user:
+                summary: Valid user registration
+                value:
+                  email: newuser@example.com
+                  password: SecurePass123
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 12345
+                  email:
+                    type: string
+                    format: email
+                    example: user@example.com
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: 2024-01-15T10:30:00Z
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      description: Login with email and password to receive JWT token
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: MyPassword123
+            examples:
+              valid_login:
+                summary: Valid login credentials
+                value:
+                  email: user@example.com
+                  password: MyPassword123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    description: JWT access token
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    example: 2024-01-15T11:30:00Z
+                    description: Token expiration timestamp
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 12345
+                      email:
+                        type: string
+                        example: user@example.com
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      description: Retrieve the authenticated user's profile information
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 12345
+                  email:
+                    type: string
+                    example: user@example.com
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: 2024-01-15T10:30:00Z
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/tasks:
+    get:
+      tags: [Tasks]
+      summary: List user tasks
+      description: Retrieve paginated list of tasks with optional filtering, searching, and sorting
+      operationId: listTasks
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+            example: 20
+        - name: status
+          in: query
+          description: Filter tasks by status
+          required: false
+          schema:
+            type: string
+            enum: [not-started, in-progress, done]
+            example: in-progress
+        - name: q
+          in: query
+          description: Search query for task titles
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+            example: report
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, dueDate, title, status]
+            default: createdAt
+            example: dueDate
+        - name: order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+            example: asc
+      responses:
+        '200':
+          description: Tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        example: 1
+                      pageSize:
+                        type: integer
+                        example: 10
+                      total:
+                        type: integer
+                        example: 25
+                      totalPages:
+                        type: integer
+                        example: 3
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Tasks]
+      summary: Create a new task
+      description: Create a new task for the authenticated user
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Complete project documentation
+                  description: Task title (required)
+                description:
+                  type: string
+                  maxLength: 1000
+                  example: Write comprehensive documentation for the new API endpoints
+                  description: Detailed task description
+                dueDate:
+                  type: string
+                  format: date-time
+                  example: 2024-01-20T17:00:00Z
+                  description: Task due date in ISO 8601 format
+                status:
+                  type: string
+                  enum: [not-started, in-progress, done]
+                  default: not-started
+                  example: not-started
+                  description: Initial task status
+                labels:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 50
+                  maxItems: 10
+                  example: [urgent, documentation, api]
+                  description: Task labels for categorization
+            examples:
+              simple_task:
+                summary: Simple task
+                value:
+                  title: Review pull request
+              detailed_task:
+                summary: Detailed task with all fields
+                value:
+                  title: Complete project documentation
+                  description: Write comprehensive documentation for the new API endpoints
+                  dueDate: 2024-01-20T17:00:00Z
+                  status: not-started
+                  labels: [urgent, documentation]
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/tasks/{taskId}:
+    get:
+      tags: [Tasks]
+      summary: Get task by ID
+      description: Retrieve a specific task by its ID
+      operationId: getTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+            example: 12345
+      responses:
+        '200':
+          description: Task retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    patch:
+      tags: [Tasks]
+      summary: Update task
+      description: Update specific fields of an existing task
+      operationId: updateTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+            example: 12345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Updated task title
+                description:
+                  type: string
+                  maxLength: 1000
+                  example: Updated task description
+                dueDate:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  example: 2024-01-25T17:00:00Z
+                status:
+                  type: string
+                  enum: [not-started, in-progress, done]
+                  example: in-progress
+                labels:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 50
+                  maxItems: 10
+                  example: [urgent, updated]
+            examples:
+              status_update:
+                summary: Update task status
+                value:
+                  status: done
+              full_update:
+                summary: Update multiple fields
+                value:
+                  title: Updated task title
+                  description: Updated description
+                  status: in-progress
+                  labels: [updated, important]
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Tasks]
+      summary: Delete task
+      description: Delete a specific task by its ID
+      operationId: deleteTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+            example: 12345
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/health:
+    get:
+      tags: [System]
+      summary: Health check
+      description: Check system health and readiness
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2024-01-15T10:30:00Z
+                  version:
+                    type: string
+                    example: 1.0.0
+                  database:
+                    type: string
+                    enum: [connected, disconnected]
+                    example: connected
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: unhealthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    example: [database_connection_failed]
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 12345
+          description: Unique task identifier
+        userId:
+          type: integer
+          format: int64
+          example: 67890
+          description: ID of the task owner
+        title:
+          type: string
+          example: Complete project documentation
+          description: Task title
+        description:
+          type: string
+          nullable: true
+          example: Write comprehensive documentation for the new API endpoints
+          description: Detailed task description
+        status:
+          type: string
+          enum: [not-started, in-progress, done]
+          example: in-progress
+          description: Current task status
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2024-01-20T17:00:00Z
+          description: Task due date
+        labels:
+          type: array
+          items:
+            type: string
+          example: [urgent, documentation, api]
+          description: Task labels for categorization
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-01-15T10:30:00Z
+          description: Task creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2024-01-15T14:20:00Z
+          description: Last modification timestamp
+      required: [id, userId, title, status, createdAt, updatedAt]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: validation_failed
+              description: Error code for programmatic handling
+            message:
+              type: string
+              example: Request validation failed
+              description: Human-readable error message
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: email
+                  issue:
+                    type: string
+                    example: must be a valid email address
+              description: Detailed validation errors
+      required: [error]
+
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            validation_failed:
+              summary: Validation error example
+              value:
+                error:
+                  code: validation_failed
+                  message: Request validation failed
+                  details:
+                    - field: email
+                      issue: must be a valid email address
+                    - field: password
+                      issue: must be at least 8 characters long
+
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            missing_token:
+              summary: Missing authentication token
+              value:
+                error:
+                  code: unauthorized
+                  message: Authentication token required
+            invalid_token:
+              summary: Invalid authentication token
+              value:
+                error:
+                  code: unauthorized
+                  message: Invalid or expired authentication token
+
+    ForbiddenError:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            access_denied:
+              summary: Access denied to resource
+              value:
+                error:
+                  code: forbidden
+                  message: Access denied to this resource
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            task_not_found:
+              summary: Task not found
+              value:
+                error:
+                  code: not_found
+                  message: Task not found
+
+    ConflictError:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            email_exists:
+              summary: Email already registered
+              value:
+                error:
+                  code: conflict
+                  message: Email address already registered
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            internal_error:
+              summary: Internal server error
+              value:
+                error:
+                  code: internal_error
+                  message: Internal server error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /v1/auth/login endpoint
+
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      description: Unique task identifier
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+        example: 12345
+
+tags:
+  - name: Authentication
+    description: User authentication and profile management
+  - name: Tasks
+    description: Task management operations
+  - name: System
+    description: System health and monitoring endpoints
