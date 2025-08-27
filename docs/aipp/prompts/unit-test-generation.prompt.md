@@ -1,12 +1,15 @@
 # Unit Test Generation Stage Prompt
 
 ## ROLE
+
 Senior test engineer generating comprehensive unit tests for frozen interfaces and implementation contracts.
 
 ## OBJECTIVE
+
 Generate complete unit test suites for all interfaces, services, repositories, and API endpoints from Stage 3 Interface Freeze. Create table-driven tests, mocks, fixtures, and test utilities that ensure 100% interface compliance and behavior validation.
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
+
 - **Testing Framework:** Jest with TypeScript support
 - **Mocking:** Jest mocks, @types/jest, ts-jest
 - **API Testing:** Supertest for HTTP endpoint testing
@@ -15,7 +18,9 @@ Generate complete unit test suites for all interfaces, services, repositories, a
 - **Naming:** `*.test.ts` for unit tests, `*.integration.test.ts` for integration tests
 
 ## INPUTS
+
 Paste the following from Stage 3 Interface Freeze output:
+
 - Complete TypeScript interface definitions
 - API contract (OpenAPI specification)
 - Database schema and model interfaces
@@ -31,12 +36,17 @@ Generate comprehensive API tests for all endpoints:
 
 ```typescript
 // tests/api/resource.test.ts
-import request from 'supertest';
-import { App } from '../../src/app';
-import { ResourceService } from '../../src/services/resource-service';
-import { CreateResourceRequest, UpdateResourceRequest, ApiResponse, ApiError } from '../../src/types';
+import request from "supertest";
+import { App } from "../../src/app";
+import { ResourceService } from "../../src/services/resource-service";
+import {
+  CreateResourceRequest,
+  UpdateResourceRequest,
+  ApiResponse,
+  ApiError,
+} from "../../src/types";
 
-describe('Resource API Endpoints', () => {
+describe("Resource API Endpoints", () => {
   let app: App;
   let mockResourceService: jest.Mocked<ResourceService>;
 
@@ -52,160 +62,180 @@ describe('Resource API Endpoints', () => {
     app = new App({ resourceService: mockResourceService });
   });
 
-  describe('POST /v1/resources', () => {
-    const validRequest: CreateResourceRequest<{ name: string; type: string }> = {
-      resource: {
-        name: 'Test Resource',
-        type: 'basic'
-      },
-      by: {
-        id: 1,
-        email: 'test@example.com',
-        name: 'Test User'
-      },
-      metadata: { source: 'api' }
-    };
+  describe("POST /v1/resources", () => {
+    const validRequest: CreateResourceRequest<{ name: string; type: string }> =
+      {
+        resource: {
+          name: "Test Resource",
+          type: "basic",
+        },
+        by: {
+          id: 1,
+          email: "test@example.com",
+          name: "Test User",
+        },
+        metadata: { source: "api" },
+      };
 
-    it('should create resource with valid request', async () => {
+    it("should create resource with valid request", async () => {
       // Arrange
       const expectedResponse = {
         data: {
           id: 1,
-          name: 'Test Resource',
-          type: 'basic',
-          createdAt: '2024-01-01T00:00:00.000Z'
+          name: "Test Resource",
+          type: "basic",
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
-        respondedAt: '2024-01-01T00:00:00.000Z',
+        respondedAt: "2024-01-01T00:00:00.000Z",
         timeTaken: 150,
-        metadata: { source: 'api' }
+        metadata: { source: "api" },
       };
 
       mockResourceService.createResource.mockResolvedValue(expectedResponse);
 
       // Act
       const response = await request(app.getServer())
-        .post('/v1/resources')
+        .post("/v1/resources")
         .send(validRequest)
         .expect(201);
 
       // Assert
       expect(response.body).toEqual({
         transaction_id: expect.any(String),
-        message: 'Resource created successfully',
+        message: "Resource created successfully",
         time_taken_ms: expect.any(Number),
-        data: expectedResponse.data
+        data: expectedResponse.data,
       });
 
-      expect(mockResourceService.createResource).toHaveBeenCalledWith(validRequest);
+      expect(mockResourceService.createResource).toHaveBeenCalledWith(
+        validRequest,
+      );
     });
 
-    it('should return 400 for invalid request body', async () => {
+    it("should return 400 for invalid request body", async () => {
       // Arrange
       const invalidRequest = {
         resource: {
-          name: '', // Invalid: empty name
-          type: 'invalid-type' // Invalid: not in enum
-        }
+          name: "", // Invalid: empty name
+          type: "invalid-type", // Invalid: not in enum
+        },
       };
 
       // Act
       const response = await request(app.getServer())
-        .post('/v1/resources')
+        .post("/v1/resources")
         .send(invalidRequest)
         .expect(400);
 
       // Assert
       expect(response.body).toMatchObject({
         transaction_id: expect.any(String),
-        message: 'Validation failed',
+        message: "Validation failed",
         error: {
-          title: 'Bad Request',
+          title: "Bad Request",
           status: 400,
-          detail: 'Request validation failed',
+          detail: "Request validation failed",
           details: expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining('name'),
+              message: expect.stringContaining("name"),
               details: expect.arrayContaining([
-                { field: 'name', issue: 'must not be empty' }
-              ])
-            })
-          ])
-        }
+                { field: "name", issue: "must not be empty" },
+              ]),
+            }),
+          ]),
+        },
       });
     });
 
-    it('should return 500 for service errors', async () => {
+    it("should return 500 for service errors", async () => {
       // Arrange
       mockResourceService.createResource.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error("Database connection failed"),
       );
 
       // Act
       const response = await request(app.getServer())
-        .post('/v1/resources')
+        .post("/v1/resources")
         .send(validRequest)
         .expect(500);
 
       // Assert
       expect(response.body).toMatchObject({
         transaction_id: expect.any(String),
-        message: 'Internal server error',
+        message: "Internal server error",
         error: {
-          title: 'Internal Server Error',
+          title: "Internal Server Error",
           status: 500,
-          detail: expect.any(String)
-        }
+          detail: expect.any(String),
+        },
       });
     });
 
     // Table-driven test for validation scenarios
     it.each([
       {
-        scenario: 'missing name field',
-        request: { resource: { type: 'basic' }, by: validRequest.by },
-        expectedError: { field: 'resource.name', issue: 'is required' }
+        scenario: "missing name field",
+        request: { resource: { type: "basic" }, by: validRequest.by },
+        expectedError: { field: "resource.name", issue: "is required" },
       },
       {
-        scenario: 'name too long',
-        request: { resource: { name: 'x'.repeat(256), type: 'basic' }, by: validRequest.by },
-        expectedError: { field: 'resource.name', issue: 'must be 255 characters or less' }
+        scenario: "name too long",
+        request: {
+          resource: { name: "x".repeat(256), type: "basic" },
+          by: validRequest.by,
+        },
+        expectedError: {
+          field: "resource.name",
+          issue: "must be 255 characters or less",
+        },
       },
       {
-        scenario: 'invalid type',
-        request: { resource: { name: 'Test', type: 'invalid' }, by: validRequest.by },
-        expectedError: { field: 'resource.type', issue: 'must be one of: basic, premium, enterprise' }
+        scenario: "invalid type",
+        request: {
+          resource: { name: "Test", type: "invalid" },
+          by: validRequest.by,
+        },
+        expectedError: {
+          field: "resource.type",
+          issue: "must be one of: basic, premium, enterprise",
+        },
       },
       {
-        scenario: 'missing by field',
-        request: { resource: { name: 'Test', type: 'basic' } },
-        expectedError: { field: 'by', issue: 'is required' }
-      }
-    ])('should validate request: $scenario', async ({ request, expectedError }) => {
-      // Act
-      const response = await request(app.getServer())
-        .post('/v1/resources')
-        .send(request)
-        .expect(400);
+        scenario: "missing by field",
+        request: { resource: { name: "Test", type: "basic" } },
+        expectedError: { field: "by", issue: "is required" },
+      },
+    ])(
+      "should validate request: $scenario",
+      async ({ request, expectedError }) => {
+        // Act
+        const response = await request(app.getServer())
+          .post("/v1/resources")
+          .send(request)
+          .expect(400);
 
-      // Assert
-      expect(response.body.error.details[0].details).toContainEqual(expectedError);
-    });
+        // Assert
+        expect(response.body.error.details[0].details).toContainEqual(
+          expectedError,
+        );
+      },
+    );
   });
 
-  describe('GET /v1/resources/:id', () => {
-    it('should return resource by ID', async () => {
+  describe("GET /v1/resources/:id", () => {
+    it("should return resource by ID", async () => {
       // Arrange
       const resourceId = 1;
       const expectedResource = {
         data: {
           id: resourceId,
-          name: 'Test Resource',
-          type: 'basic' as const,
-          createdAt: '2024-01-01T00:00:00.000Z'
+          name: "Test Resource",
+          type: "basic" as const,
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
-        respondedAt: '2024-01-01T00:00:00.000Z',
+        respondedAt: "2024-01-01T00:00:00.000Z",
         timeTaken: 50,
-        metadata: {}
+        metadata: {},
       };
 
       mockResourceService.getResourceById.mockResolvedValue(expectedResource);
@@ -218,15 +248,17 @@ describe('Resource API Endpoints', () => {
       // Assert
       expect(response.body).toEqual({
         transaction_id: expect.any(String),
-        message: 'OK',
+        message: "OK",
         time_taken_ms: expect.any(Number),
-        data: expectedResource.data
+        data: expectedResource.data,
       });
 
-      expect(mockResourceService.getResourceById).toHaveBeenCalledWith(resourceId);
+      expect(mockResourceService.getResourceById).toHaveBeenCalledWith(
+        resourceId,
+      );
     });
 
-    it('should return 404 for non-existent resource', async () => {
+    it("should return 404 for non-existent resource", async () => {
       // Arrange
       const resourceId = 999;
       mockResourceService.getResourceById.mockResolvedValue(null);
@@ -239,92 +271,97 @@ describe('Resource API Endpoints', () => {
       // Assert
       expect(response.body).toMatchObject({
         transaction_id: expect.any(String),
-        message: 'Resource not found',
+        message: "Resource not found",
         error: {
-          title: 'Not Found',
+          title: "Not Found",
           status: 404,
-          detail: `Resource with ID ${resourceId} not found`
-        }
+          detail: `Resource with ID ${resourceId} not found`,
+        },
       });
     });
 
     it.each([
-      { id: 'invalid', expectedError: 'must be a number' },
-      { id: '0', expectedError: 'must be greater than 0' },
-      { id: '-1', expectedError: 'must be greater than 0' }
-    ])('should validate resource ID parameter: $id', async ({ id, expectedError }) => {
-      // Act
-      const response = await request(app.getServer())
-        .get(`/v1/resources/${id}`)
-        .expect(400);
+      { id: "invalid", expectedError: "must be a number" },
+      { id: "0", expectedError: "must be greater than 0" },
+      { id: "-1", expectedError: "must be greater than 0" },
+    ])(
+      "should validate resource ID parameter: $id",
+      async ({ id, expectedError }) => {
+        // Act
+        const response = await request(app.getServer())
+          .get(`/v1/resources/${id}`)
+          .expect(400);
 
-      // Assert
-      expect(response.body.error.details[0].details).toContainEqual({
-        field: 'id',
-        issue: expectedError
-      });
-    });
+        // Assert
+        expect(response.body.error.details[0].details).toContainEqual({
+          field: "id",
+          issue: expectedError,
+        });
+      },
+    );
   });
 
-  describe('GET /v1/resources', () => {
-    it('should return paginated resource list', async () => {
+  describe("GET /v1/resources", () => {
+    it("should return paginated resource list", async () => {
       // Arrange
       const mockResponse = {
         resources: [
-          { id: 1, name: 'Resource 1', type: 'basic' as const },
-          { id: 2, name: 'Resource 2', type: 'premium' as const }
+          { id: 1, name: "Resource 1", type: "basic" as const },
+          { id: 2, name: "Resource 2", type: "premium" as const },
         ],
         pagination: {
           page: 1,
           limit: 20,
           total: 2,
-          totalPages: 1
-        }
+          totalPages: 1,
+        },
       };
 
       mockResourceService.listResources.mockResolvedValue(mockResponse);
 
       // Act
       const response = await request(app.getServer())
-        .get('/v1/resources')
+        .get("/v1/resources")
         .expect(200);
 
       // Assert
       expect(response.body).toEqual({
         transaction_id: expect.any(String),
-        message: 'OK',
+        message: "OK",
         time_taken_ms: expect.any(Number),
         data: mockResponse.resources,
-        meta: mockResponse.pagination
+        meta: mockResponse.pagination,
       });
 
       expect(mockResourceService.listResources).toHaveBeenCalledWith({});
     });
 
-    it('should handle query parameters', async () => {
+    it("should handle query parameters", async () => {
       // Arrange
       const queryParams = {
         page: 2,
         limit: 10,
-        type: 'premium',
-        nameSearch: 'test',
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
+        type: "premium",
+        nameSearch: "test",
+        sortBy: "createdAt",
+        sortOrder: "desc",
       };
 
       mockResourceService.listResources.mockResolvedValue({
         resources: [],
-        pagination: { page: 2, limit: 10, total: 0, totalPages: 0 }
+        pagination: { page: 2, limit: 10, total: 0, totalPages: 0 },
       });
 
       // Act
       await request(app.getServer())
-        .get('/v1/resources')
+        .get("/v1/resources")
         .query(queryParams)
         .expect(200);
 
       // Assert
-      expect(mockResourceService.listResources).toHaveBeenCalledWith(queryParams);
+      expect(mockResourceService.listResources).toHaveBeenCalledWith(
+        queryParams,
+      );
     });
   });
 });
@@ -336,12 +373,20 @@ Generate tests for business logic services:
 
 ```typescript
 // tests/services/resource-service.test.ts
-import { ResourceService } from '../../src/services/resource-service';
-import { ResourceRepository } from '../../src/repositories/resource-repository';
-import { CreateResourceRequest, UpdateResourceRequest, ResourceModel } from '../../src/types';
-import { ValidationError, NotFoundError, BusinessLogicError } from '../../src/errors';
+import { ResourceService } from "../../src/services/resource-service";
+import { ResourceRepository } from "../../src/repositories/resource-repository";
+import {
+  CreateResourceRequest,
+  UpdateResourceRequest,
+  ResourceModel,
+} from "../../src/types";
+import {
+  ValidationError,
+  NotFoundError,
+  BusinessLogicError,
+} from "../../src/errors";
 
-describe('ResourceService', () => {
+describe("ResourceService", () => {
   let resourceService: ResourceService;
   let mockResourceRepository: jest.Mocked<ResourceRepository>;
 
@@ -357,30 +402,31 @@ describe('ResourceService', () => {
     resourceService = new ResourceService(mockResourceRepository);
   });
 
-  describe('createResource', () => {
-    const validRequest: CreateResourceRequest<{ name: string; type: string }> = {
-      resource: {
-        name: 'Test Resource',
-        type: 'basic'
-      },
-      by: {
-        id: 1,
-        email: 'test@example.com',
-        name: 'Test User'
-      },
-      metadata: { source: 'api' }
-    };
+  describe("createResource", () => {
+    const validRequest: CreateResourceRequest<{ name: string; type: string }> =
+      {
+        resource: {
+          name: "Test Resource",
+          type: "basic",
+        },
+        by: {
+          id: 1,
+          email: "test@example.com",
+          name: "Test User",
+        },
+        metadata: { source: "api" },
+      };
 
-    it('should create resource successfully', async () => {
+    it("should create resource successfully", async () => {
       // Arrange
       const mockCreatedResource: ResourceModel = {
         id: 1,
-        name: 'Test Resource',
-        type: 'basic',
-        metadata: { source: 'api' },
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-        deletedAt: null
+        name: "Test Resource",
+        type: "basic",
+        metadata: { source: "api" },
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+        deletedAt: null,
       };
 
       mockResourceRepository.create.mockResolvedValue(mockCreatedResource);
@@ -392,89 +438,96 @@ describe('ResourceService', () => {
       expect(result).toEqual({
         data: {
           id: 1,
-          name: 'Test Resource',
-          type: 'basic',
-          createdAt: '2024-01-01T00:00:00.000Z'
+          name: "Test Resource",
+          type: "basic",
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
         respondedAt: expect.any(String),
         timeTaken: expect.any(Number),
-        metadata: { source: 'api' }
+        metadata: { source: "api" },
       });
 
       expect(mockResourceRepository.create).toHaveBeenCalledWith({
-        name: 'Test Resource',
-        type: 'basic',
-        metadata: { source: 'api' }
+        name: "Test Resource",
+        type: "basic",
+        metadata: { source: "api" },
       });
     });
 
-    it('should throw ValidationError for invalid input', async () => {
+    it("should throw ValidationError for invalid input", async () => {
       // Arrange
       const invalidRequest = {
         ...validRequest,
-        resource: { name: '', type: 'invalid' as any }
+        resource: { name: "", type: "invalid" as any },
       };
 
       // Act & Assert
-      await expect(resourceService.createResource(invalidRequest))
-        .rejects
-        .toThrow(ValidationError);
+      await expect(
+        resourceService.createResource(invalidRequest),
+      ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw BusinessLogicError for business rule violations', async () => {
+    it("should throw BusinessLogicError for business rule violations", async () => {
       // Arrange
       const duplicateRequest = {
         ...validRequest,
-        resource: { name: 'Duplicate Resource', type: 'basic' }
+        resource: { name: "Duplicate Resource", type: "basic" },
       };
 
       mockResourceRepository.create.mockRejectedValue(
-        new Error('Duplicate key value violates unique constraint')
+        new Error("Duplicate key value violates unique constraint"),
       );
 
       // Act & Assert
-      await expect(resourceService.createResource(duplicateRequest))
-        .rejects
-        .toThrow(BusinessLogicError);
+      await expect(
+        resourceService.createResource(duplicateRequest),
+      ).rejects.toThrow(BusinessLogicError);
     });
 
     // Table-driven tests for validation scenarios
     it.each([
       {
-        scenario: 'empty name',
-        request: { resource: { name: '', type: 'basic' }, by: validRequest.by },
-        expectedError: 'Resource name cannot be empty'
+        scenario: "empty name",
+        request: { resource: { name: "", type: "basic" }, by: validRequest.by },
+        expectedError: "Resource name cannot be empty",
       },
       {
-        scenario: 'name too long',
-        request: { resource: { name: 'x'.repeat(256), type: 'basic' }, by: validRequest.by },
-        expectedError: 'Resource name cannot exceed 255 characters'
+        scenario: "name too long",
+        request: {
+          resource: { name: "x".repeat(256), type: "basic" },
+          by: validRequest.by,
+        },
+        expectedError: "Resource name cannot exceed 255 characters",
       },
       {
-        scenario: 'invalid type',
-        request: { resource: { name: 'Test', type: 'invalid' as any }, by: validRequest.by },
-        expectedError: 'Resource type must be one of: basic, premium, enterprise'
-      }
-    ])('should validate: $scenario', async ({ request, expectedError }) => {
+        scenario: "invalid type",
+        request: {
+          resource: { name: "Test", type: "invalid" as any },
+          by: validRequest.by,
+        },
+        expectedError:
+          "Resource type must be one of: basic, premium, enterprise",
+      },
+    ])("should validate: $scenario", async ({ request, expectedError }) => {
       // Act & Assert
-      await expect(resourceService.createResource(request))
-        .rejects
-        .toThrow(expectedError);
+      await expect(resourceService.createResource(request)).rejects.toThrow(
+        expectedError,
+      );
     });
   });
 
-  describe('getResourceById', () => {
-    it('should return resource when found', async () => {
+  describe("getResourceById", () => {
+    it("should return resource when found", async () => {
       // Arrange
       const resourceId = 1;
       const mockResource: ResourceModel = {
         id: resourceId,
-        name: 'Test Resource',
-        type: 'basic',
+        name: "Test Resource",
+        type: "basic",
         metadata: {},
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-        deletedAt: null
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+        deletedAt: null,
       };
 
       mockResourceRepository.findByPk.mockResolvedValue(mockResource);
@@ -486,19 +539,19 @@ describe('ResourceService', () => {
       expect(result).toEqual({
         data: {
           id: resourceId,
-          name: 'Test Resource',
-          type: 'basic',
-          createdAt: '2024-01-01T00:00:00.000Z'
+          name: "Test Resource",
+          type: "basic",
+          createdAt: "2024-01-01T00:00:00.000Z",
         },
         respondedAt: expect.any(String),
         timeTaken: expect.any(Number),
-        metadata: {}
+        metadata: {},
       });
 
       expect(mockResourceRepository.findByPk).toHaveBeenCalledWith(resourceId);
     });
 
-    it('should return null when resource not found', async () => {
+    it("should return null when resource not found", async () => {
       // Arrange
       const resourceId = 999;
       mockResourceRepository.findByPk.mockResolvedValue(null);
@@ -511,11 +564,11 @@ describe('ResourceService', () => {
       expect(mockResourceRepository.findByPk).toHaveBeenCalledWith(resourceId);
     });
 
-    it('should throw ValidationError for invalid ID', async () => {
+    it("should throw ValidationError for invalid ID", async () => {
       // Act & Assert
-      await expect(resourceService.getResourceById(-1))
-        .rejects
-        .toThrow('Resource ID must be a positive number');
+      await expect(resourceService.getResourceById(-1)).rejects.toThrow(
+        "Resource ID must be a positive number",
+      );
     });
   });
 });
@@ -527,11 +580,14 @@ Generate tests for data access layer:
 
 ```typescript
 // tests/repositories/resource-repository.test.ts
-import { ResourceRepository } from '../../src/repositories/resource-repository';
-import { ResourceModel, ResourceCreationAttributes } from '../../src/types';
-import { setupTestDatabase, cleanupTestDatabase } from '../helpers/test-database';
+import { ResourceRepository } from "../../src/repositories/resource-repository";
+import { ResourceModel, ResourceCreationAttributes } from "../../src/types";
+import {
+  setupTestDatabase,
+  cleanupTestDatabase,
+} from "../helpers/test-database";
 
-describe('ResourceRepository', () => {
+describe("ResourceRepository", () => {
   let resourceRepository: ResourceRepository;
 
   beforeAll(async () => {
@@ -548,13 +604,13 @@ describe('ResourceRepository', () => {
     await resourceRepository.truncate();
   });
 
-  describe('create', () => {
-    it('should create resource with valid attributes', async () => {
+  describe("create", () => {
+    it("should create resource with valid attributes", async () => {
       // Arrange
       const attributes: ResourceCreationAttributes = {
-        name: 'Test Resource',
-        type: 'basic',
-        metadata: { source: 'test' }
+        name: "Test Resource",
+        type: "basic",
+        metadata: { source: "test" },
       };
 
       // Act
@@ -563,65 +619,68 @@ describe('ResourceRepository', () => {
       // Assert
       expect(result).toMatchObject({
         id: expect.any(Number),
-        name: 'Test Resource',
-        type: 'basic',
-        metadata: { source: 'test' },
+        name: "Test Resource",
+        type: "basic",
+        metadata: { source: "test" },
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
-        deletedAt: null
+        deletedAt: null,
       });
     });
 
-    it('should enforce database constraints', async () => {
+    it("should enforce database constraints", async () => {
       // Arrange
       const invalidAttributes = {
-        name: 'x'.repeat(256), // Exceeds max length
-        type: 'basic' as const
+        name: "x".repeat(256), // Exceeds max length
+        type: "basic" as const,
       };
 
       // Act & Assert
-      await expect(resourceRepository.create(invalidAttributes))
-        .rejects
-        .toThrow(/constraint/i);
+      await expect(
+        resourceRepository.create(invalidAttributes),
+      ).rejects.toThrow(/constraint/i);
     });
 
     // Table-driven tests for constraint validation
     it.each([
       {
-        scenario: 'empty name',
-        attributes: { name: '', type: 'basic' as const },
-        expectedError: /name.*empty/i
+        scenario: "empty name",
+        attributes: { name: "", type: "basic" as const },
+        expectedError: /name.*empty/i,
       },
       {
-        scenario: 'invalid type',
-        attributes: { name: 'Test', type: 'invalid' as any },
-        expectedError: /type.*invalid/i
+        scenario: "invalid type",
+        attributes: { name: "Test", type: "invalid" as any },
+        expectedError: /type.*invalid/i,
       },
       {
-        scenario: 'null metadata',
-        attributes: { name: 'Test', type: 'basic' as const, metadata: null },
-        expectedError: null // Should not throw, null is allowed
-      }
-    ])('should handle constraint: $scenario', async ({ attributes, expectedError }) => {
-      // Act & Assert
-      if (expectedError) {
-        await expect(resourceRepository.create(attributes))
-          .rejects
-          .toThrow(expectedError);
-      } else {
-        await expect(resourceRepository.create(attributes))
-          .resolves
-          .toBeTruthy();
-      }
-    });
+        scenario: "null metadata",
+        attributes: { name: "Test", type: "basic" as const, metadata: null },
+        expectedError: null, // Should not throw, null is allowed
+      },
+    ])(
+      "should handle constraint: $scenario",
+      async ({ attributes, expectedError }) => {
+        // Act & Assert
+        if (expectedError) {
+          await expect(resourceRepository.create(attributes)).rejects.toThrow(
+            expectedError,
+          );
+        } else {
+          await expect(
+            resourceRepository.create(attributes),
+          ).resolves.toBeTruthy();
+        }
+      },
+    );
   });
 
-  describe('findByPk', () => {
-    it('should find existing resource', async () => {
+  describe("findByPk", () => {
+    it("should find existing resource", async () => {
       // Arrange
       const created = await resourceRepository.create({
-        name: 'Test Resource',
-        type: 'basic'
+        name: "Test Resource",
+        type: "basic",
       });
 
       // Act
@@ -631,7 +690,7 @@ describe('ResourceRepository', () => {
       expect(found).toEqual(created);
     });
 
-    it('should return null for non-existent resource', async () => {
+    it("should return null for non-existent resource", async () => {
       // Act
       const result = await resourceRepository.findByPk(999);
 
@@ -639,11 +698,11 @@ describe('ResourceRepository', () => {
       expect(result).toBeNull();
     });
 
-    it('should exclude soft-deleted resources', async () => {
+    it("should exclude soft-deleted resources", async () => {
       // Arrange
       const created = await resourceRepository.create({
-        name: 'Test Resource',
-        type: 'basic'
+        name: "Test Resource",
+        type: "basic",
       });
 
       await resourceRepository.delete(created.id);
@@ -656,18 +715,24 @@ describe('ResourceRepository', () => {
     });
   });
 
-  describe('findAndCountAll', () => {
+  describe("findAndCountAll", () => {
     beforeEach(async () => {
       // Create test data
       await Promise.all([
-        resourceRepository.create({ name: 'Basic Resource 1', type: 'basic' }),
-        resourceRepository.create({ name: 'Basic Resource 2', type: 'basic' }),
-        resourceRepository.create({ name: 'Premium Resource', type: 'premium' }),
-        resourceRepository.create({ name: 'Enterprise Resource', type: 'enterprise' })
+        resourceRepository.create({ name: "Basic Resource 1", type: "basic" }),
+        resourceRepository.create({ name: "Basic Resource 2", type: "basic" }),
+        resourceRepository.create({
+          name: "Premium Resource",
+          type: "premium",
+        }),
+        resourceRepository.create({
+          name: "Enterprise Resource",
+          type: "enterprise",
+        }),
       ]);
     });
 
-    it('should return all resources with default options', async () => {
+    it("should return all resources with default options", async () => {
       // Act
       const result = await resourceRepository.findAndCountAll({});
 
@@ -677,25 +742,27 @@ describe('ResourceRepository', () => {
       expect(result.resources[0]).toMatchObject({
         id: expect.any(Number),
         name: expect.any(String),
-        type: expect.any(String)
+        type: expect.any(String),
       });
     });
 
-    it('should filter by type', async () => {
+    it("should filter by type", async () => {
       // Act
-      const result = await resourceRepository.findAndCountAll({ type: 'basic' });
+      const result = await resourceRepository.findAndCountAll({
+        type: "basic",
+      });
 
       // Assert
       expect(result.total).toBe(2);
       expect(result.resources).toHaveLength(2);
-      expect(result.resources.every(r => r.type === 'basic')).toBe(true);
+      expect(result.resources.every((r) => r.type === "basic")).toBe(true);
     });
 
-    it('should paginate results', async () => {
+    it("should paginate results", async () => {
       // Act
       const result = await resourceRepository.findAndCountAll({
         page: 2,
-        limit: 2
+        limit: 2,
       });
 
       // Assert
@@ -703,27 +770,27 @@ describe('ResourceRepository', () => {
       expect(result.resources).toHaveLength(2);
     });
 
-    it('should search by name', async () => {
+    it("should search by name", async () => {
       // Act
       const result = await resourceRepository.findAndCountAll({
-        nameSearch: 'Premium'
+        nameSearch: "Premium",
       });
 
       // Assert
       expect(result.total).toBe(1);
-      expect(result.resources[0].name).toBe('Premium Resource');
+      expect(result.resources[0].name).toBe("Premium Resource");
     });
 
-    it('should sort results', async () => {
+    it("should sort results", async () => {
       // Act
       const result = await resourceRepository.findAndCountAll({
-        sortBy: 'name',
-        sortOrder: 'desc'
+        sortBy: "name",
+        sortOrder: "desc",
       });
 
       // Assert
-      expect(result.resources[0].name).toBe('Premium Resource');
-      expect(result.resources[3].name).toBe('Basic Resource 1');
+      expect(result.resources[0].name).toBe("Premium Resource");
+      expect(result.resources[3].name).toBe("Basic Resource 1");
     });
   });
 });
@@ -735,48 +802,48 @@ Generate tests for configuration validation:
 
 ```typescript
 // tests/config/app-config.test.ts
-import { AppConfig, validateConfig } from '../../src/config/app-config';
-import { ValidationError } from '../../src/errors';
+import { AppConfig, validateConfig } from "../../src/config/app-config";
+import { ValidationError } from "../../src/errors";
 
-describe('AppConfig', () => {
+describe("AppConfig", () => {
   const validConfig: AppConfig = {
     server: {
       port: 3000,
-      host: 'localhost',
-      env: 'development',
+      host: "localhost",
+      env: "development",
       requestTimeout: 30000,
-      maxPayloadSize: '10mb'
+      maxPayloadSize: "10mb",
     },
     database: {
-      host: 'localhost',
+      host: "localhost",
       port: 5432,
-      database: 'test_db',
-      username: 'test_user',
-      password: 'test_password',
+      database: "test_db",
+      username: "test_user",
+      password: "test_password",
       pool: {
         max: 10,
         min: 2,
         idle: 10000,
-        acquire: 20000
+        acquire: 20000,
       },
-      logging: false
+      logging: false,
     },
     logging: {
-      level: 'info',
-      format: 'json',
-      service: 'test-service',
-      correlationIdHeader: 'x-correlation-id'
+      level: "info",
+      format: "json",
+      service: "test-service",
+      correlationIdHeader: "x-correlation-id",
     },
     features: {
       resourceCreationEnabled: true,
       advancedResourceTypesEnabled: false,
-      metadataStorageEnabled: true
+      metadataStorageEnabled: true,
     },
-    external: {}
+    external: {},
   };
 
-  describe('validateConfig', () => {
-    it('should validate valid configuration', () => {
+  describe("validateConfig", () => {
+    it("should validate valid configuration", () => {
       // Act & Assert
       expect(() => validateConfig(validConfig)).not.toThrow();
     });
@@ -784,43 +851,51 @@ describe('AppConfig', () => {
     // Table-driven tests for configuration validation
     it.each([
       {
-        scenario: 'invalid server port',
+        scenario: "invalid server port",
         config: { ...validConfig, server: { ...validConfig.server, port: -1 } },
-        expectedError: /port.*positive/i
+        expectedError: /port.*positive/i,
       },
       {
-        scenario: 'invalid environment',
-        config: { ...validConfig, server: { ...validConfig.server, env: 'invalid' as any } },
-        expectedError: /env.*development|testing|staging|production/i
+        scenario: "invalid environment",
+        config: {
+          ...validConfig,
+          server: { ...validConfig.server, env: "invalid" as any },
+        },
+        expectedError: /env.*development|testing|staging|production/i,
       },
       {
-        scenario: 'invalid log level',
-        config: { ...validConfig, logging: { ...validConfig.logging, level: 'invalid' as any } },
-        expectedError: /level.*debug|info|warn|error|fatal/i
+        scenario: "invalid log level",
+        config: {
+          ...validConfig,
+          logging: { ...validConfig.logging, level: "invalid" as any },
+        },
+        expectedError: /level.*debug|info|warn|error|fatal/i,
       },
       {
-        scenario: 'missing required field',
-        config: { ...validConfig, server: { ...validConfig.server, port: undefined as any } },
-        expectedError: /port.*required/i
-      }
-    ])('should reject: $scenario', ({ config, expectedError }) => {
+        scenario: "missing required field",
+        config: {
+          ...validConfig,
+          server: { ...validConfig.server, port: undefined as any },
+        },
+        expectedError: /port.*required/i,
+      },
+    ])("should reject: $scenario", ({ config, expectedError }) => {
       // Act & Assert
-      expect(() => validateConfig(config))
-        .toThrow(expectedError);
+      expect(() => validateConfig(config)).toThrow(expectedError);
     });
   });
 
-  describe('environment variable mapping', () => {
-    it('should load config from environment variables', () => {
+  describe("environment variable mapping", () => {
+    it("should load config from environment variables", () => {
       // Arrange
       const originalEnv = process.env;
       process.env = {
         ...originalEnv,
-        PORT: '4000',
-        HOST: '0.0.0.0',
-        NODE_ENV: 'production',
-        DB_HOST: 'prod-db',
-        LOG_LEVEL: 'warn'
+        PORT: "4000",
+        HOST: "0.0.0.0",
+        NODE_ENV: "production",
+        DB_HOST: "prod-db",
+        LOG_LEVEL: "warn",
       };
 
       // Act
@@ -828,10 +903,10 @@ describe('AppConfig', () => {
 
       // Assert
       expect(config.server.port).toBe(4000);
-      expect(config.server.host).toBe('0.0.0.0');
-      expect(config.server.env).toBe('production');
-      expect(config.database.host).toBe('prod-db');
-      expect(config.logging.level).toBe('warn');
+      expect(config.server.host).toBe("0.0.0.0");
+      expect(config.server.env).toBe("production");
+      expect(config.database.host).toBe("prod-db");
+      expect(config.logging.level).toBe("warn");
 
       // Cleanup
       process.env = originalEnv;
@@ -846,68 +921,73 @@ Generate reusable test utilities:
 
 ```typescript
 // tests/helpers/test-fixtures.ts
-import { CreateResourceRequest, ResourceModel, User } from '../../src/types';
+import { CreateResourceRequest, ResourceModel, User } from "../../src/types";
 
 export class TestFixtures {
   static createUser(overrides: Partial<User> = {}): User {
     return {
       id: 1,
-      email: 'test@example.com',
-      name: 'Test User',
-      ...overrides
+      email: "test@example.com",
+      name: "Test User",
+      ...overrides,
     };
   }
 
   static createResourceRequest<T>(
     resource: T,
-    overrides: Partial<CreateResourceRequest<T>> = {}
+    overrides: Partial<CreateResourceRequest<T>> = {},
   ): CreateResourceRequest<T> {
     return {
       resource,
       by: this.createUser(),
-      metadata: { source: 'test' },
-      ...overrides
+      metadata: { source: "test" },
+      ...overrides,
     };
   }
 
-  static createResourceModel(overrides: Partial<ResourceModel> = {}): ResourceModel {
+  static createResourceModel(
+    overrides: Partial<ResourceModel> = {},
+  ): ResourceModel {
     return {
       id: 1,
-      name: 'Test Resource',
-      type: 'basic',
+      name: "Test Resource",
+      type: "basic",
       metadata: {},
-      createdAt: new Date('2024-01-01T00:00:00.000Z'),
-      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+      createdAt: new Date("2024-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       deletedAt: null,
-      ...overrides
+      ...overrides,
     };
   }
 
-  static createResourceArray(count: number, overrides: Partial<ResourceModel> = {}): ResourceModel[] {
+  static createResourceArray(
+    count: number,
+    overrides: Partial<ResourceModel> = {},
+  ): ResourceModel[] {
     return Array.from({ length: count }, (_, index) =>
       this.createResourceModel({
         id: index + 1,
         name: `Resource ${index + 1}`,
-        ...overrides
-      })
+        ...overrides,
+      }),
     );
   }
 }
 
 // tests/helpers/test-database.ts
-import { Sequelize } from 'sequelize';
-import { ResourceModel } from '../../src/models/resource';
+import { Sequelize } from "sequelize";
+import { ResourceModel } from "../../src/models/resource";
 
 let testDatabase: Sequelize;
 
 export async function setupTestDatabase(): Promise<void> {
-  testDatabase = new Sequelize('sqlite::memory:', {
+  testDatabase = new Sequelize("sqlite::memory:", {
     logging: false,
     define: {
       timestamps: true,
       paranoid: true,
-      underscored: true
-    }
+      underscored: true,
+    },
   });
 
   // Initialize models
@@ -928,30 +1008,30 @@ export function getTestDatabase(): Sequelize {
 }
 
 // tests/helpers/api-test-helpers.ts
-import { Application } from 'express';
-import request from 'supertest';
-import { ApiResponse, ApiError } from '../../src/types';
+import { Application } from "express";
+import request from "supertest";
+import { ApiResponse, ApiError } from "../../src/types";
 
 export class ApiTestHelpers {
   static async expectSuccessResponse<T>(
     app: Application,
-    method: 'get' | 'post' | 'put' | 'delete',
+    method: "get" | "post" | "put" | "delete",
     path: string,
     expectedStatus: number = 200,
-    body?: any
+    body?: any,
   ): Promise<ApiResponse<T>> {
     const req = request(app)[method](path);
-    
+
     if (body) {
       req.send(body);
     }
 
     const response = await req.expect(expectedStatus);
-    
+
     expect(response.body).toMatchObject({
       transaction_id: expect.any(String),
       message: expect.any(String),
-      time_taken_ms: expect.any(Number)
+      time_taken_ms: expect.any(Number),
     });
 
     return response.body;
@@ -959,27 +1039,27 @@ export class ApiTestHelpers {
 
   static async expectErrorResponse(
     app: Application,
-    method: 'get' | 'post' | 'put' | 'delete',
+    method: "get" | "post" | "put" | "delete",
     path: string,
     expectedStatus: number,
-    body?: any
+    body?: any,
   ): Promise<ApiError> {
     const req = request(app)[method](path);
-    
+
     if (body) {
       req.send(body);
     }
 
     const response = await req.expect(expectedStatus);
-    
+
     expect(response.body).toMatchObject({
       transaction_id: expect.any(String),
       message: expect.any(String),
       error: {
         title: expect.any(String),
         status: expectedStatus,
-        detail: expect.any(String)
-      }
+        detail: expect.any(String),
+      },
     });
 
     return response.body.error;
@@ -989,7 +1069,7 @@ export class ApiTestHelpers {
     expect(response).toMatchObject({
       transaction_id: expect.stringMatching(/^[a-f0-9-]{36}$/), // UUID format
       message: expect.any(String),
-      time_taken_ms: expect.any(Number)
+      time_taken_ms: expect.any(Number),
     });
 
     if (response.data) {
@@ -1005,8 +1085,8 @@ export class ApiTestHelpers {
 }
 
 // tests/helpers/mock-factories.ts
-import { jest } from '@jest/globals';
-import { ResourceService, ResourceRepository } from '../../src/types';
+import { jest } from "@jest/globals";
+import { ResourceService, ResourceRepository } from "../../src/types";
 
 export class MockFactories {
   static createMockResourceService(): jest.Mocked<ResourceService> {
@@ -1034,6 +1114,7 @@ export class MockFactories {
 ## MANDATORY TEST QUALITY CHECKLIST
 
 ### Test Coverage Requirements
+
 - [ ] ≥90% line coverage for all service methods
 - [ ] 100% interface method coverage
 - [ ] All error conditions tested
@@ -1041,6 +1122,7 @@ export class MockFactories {
 - [ ] Edge cases and boundary conditions tested
 
 ### Test Organization Standards
+
 - [ ] Descriptive test names following "should [action] when [condition]" pattern
 - [ ] Arrange-Act-Assert structure in all tests
 - [ ] Table-driven tests for multiple similar scenarios
@@ -1048,6 +1130,7 @@ export class MockFactories {
 - [ ] Clean setup/teardown with beforeEach/afterEach
 
 ### Mock and Fixture Standards
+
 - [ ] Type-safe mocks using jest.Mocked<T>
 - [ ] Reusable test fixtures and builders
 - [ ] Proper mock isolation between tests
@@ -1055,6 +1138,7 @@ export class MockFactories {
 - [ ] Database tests using isolated test database
 
 ### API Testing Standards
+
 - [ ] All HTTP status codes tested
 - [ ] Request/response validation tested
 - [ ] Error response format validation
@@ -1063,10 +1147,11 @@ export class MockFactories {
 
 ## FINAL OUTPUT FORMAT
 
-```markdown
+````markdown
 # Unit Test Suite: [Feature Name]
 
 ## Test Coverage Summary
+
 **Total Tests:** [Count] unit tests, [Count] integration tests
 **Coverage:** [%] line coverage, 100% interface coverage
 **Test Files:** [Count] test files generated
@@ -1074,27 +1159,33 @@ export class MockFactories {
 ## Generated Test Files
 
 ### API Endpoint Tests
+
 - `tests/api/resource.test.ts` - Complete API endpoint test suite
 - `tests/api/validation.test.ts` - Request validation test suite
 
-### Service Layer Tests  
+### Service Layer Tests
+
 - `tests/services/resource-service.test.ts` - Business logic test suite
 - `tests/services/error-handling.test.ts` - Error scenario test suite
 
 ### Repository Layer Tests
+
 - `tests/repositories/resource-repository.test.ts` - Data access test suite
 - `tests/repositories/database-constraints.test.ts` - Database constraint tests
 
 ### Configuration Tests
+
 - `tests/config/app-config.test.ts` - Configuration validation tests
 
 ### Test Utilities
+
 - `tests/helpers/test-fixtures.ts` - Reusable test data builders
 - `tests/helpers/test-database.ts` - Database setup/teardown utilities
 - `tests/helpers/api-test-helpers.ts` - API testing utilities
 - `tests/helpers/mock-factories.ts` - Mock object factories
 
 ## Test Execution Commands
+
 ```bash
 # Run all tests
 npm test
@@ -1108,8 +1199,10 @@ npm test -- resource
 # Run in watch mode
 npm run test:watch
 ```
+````
 
 ## Quality Assurance
+
 - ✅ 90%+ line coverage achieved
 - ✅ 100% interface coverage achieved
 - ✅ All error scenarios tested
@@ -1118,10 +1211,12 @@ npm run test:watch
 - ✅ Isolated test database setup
 
 ## Next Steps
+
 - Tests are ready for implementation validation
 - Set up continuous integration test execution
 - Configure coverage reporting and thresholds
 - Implement test-driven development workflow
+
 ```
 
 ## SUCCESS CRITERIA
@@ -1133,3 +1228,4 @@ npm run test:watch
 - [ ] Database tests with proper isolation
 - [ ] API tests covering all endpoints and status codes
 - [ ] Configuration validation tests complete
+```

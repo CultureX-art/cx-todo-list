@@ -1,4 +1,4 @@
-# FOLDER\_STRUCTURE.md
+# FOLDER_STRUCTURE.md
 
 > Canonical, JS‑first layout for the **backend repo**. This file is referenced by **CLAUDE.md** and must remain in sync with it.
 
@@ -51,9 +51,9 @@ adapters     → utils, clients
 
 ## Routing Conventions
 
-* Define routes in `routes/<resource>.routes.ts` and mount controllers.
-* Keep controllers lean: parameter extraction → service call → response.
-* Mount routes in server entrypoint (e.g., `src/index.ts` or `src/server.ts`).
+- Define routes in `routes/<resource>.routes.ts` and mount controllers.
+- Keep controllers lean: parameter extraction → service call → response.
+- Mount routes in server entrypoint (e.g., `src/index.ts` or `src/server.ts`).
 
 **Example**
 
@@ -71,11 +71,11 @@ src/
 
 ## Naming (JS Standard)
 
-* Files & folders: **kebab-case** (e.g., `get-creator.service.ts`)
-* Variables & functions: **camelCase**
-* Classes & constructors: **PascalCase**
-* Constants & env: **UPPER\_SNAKE\_CASE**
-* DB tables/columns: **snake\_case**
+- Files & folders: **kebab-case** (e.g., `get-creator.service.ts`)
+- Variables & functions: **camelCase**
+- Classes & constructors: **PascalCase**
+- Constants & env: **UPPER_SNAKE_CASE**
+- DB tables/columns: **snake_case**
 
 > See **CLAUDE.md → Naming Conventions** for the canonical rules.
 
@@ -83,9 +83,9 @@ src/
 
 ## Testing Layout
 
-* Mirror source structure under `__tests__/` at repo root.
-* Unit tests colocate per area; integration tests under `__tests__/integration/`.
-* Use `testdata/` within each service for deterministic fixtures and golden files.
+- Mirror source structure under `__tests__/` at repo root.
+- Unit tests colocate per area; integration tests under `__tests__/integration/`.
+- Use `testdata/` within each service for deterministic fixtures and golden files.
 
 ```
 backend/__tests__/
@@ -103,25 +103,30 @@ backend/__tests__/
 # Backend
 
 ## Overview
+
 Brief description of the platform’s backend, major services, and tech stack.
 
 ## Getting Started
+
 - Prereqs (Node, Docker, DB)
 - Install & bootstrap
 - Run: `pnpm dev` / `npm run dev`
 - Env: `.env.example` → `.env`
 
 ## Structure
+
 - `src/services/<service-name>`: bounded context services
 - `shared/`: cross-service utilities (avoid tight coupling)
 - `docs/`, `infra/`, `scripts/`
 
 ## Development
+
 - Lint/format/test commands
 - Commit style (Conventional Commits)
 - Branching & release (SemVer)
 
 ## Operations
+
 - Envs & config
 - Observability (logs, metrics, tracing)
 - Runbooks & dashboards (links)
@@ -129,18 +134,19 @@ Brief description of the platform’s backend, major services, and tech stack.
 
 ---
 
-## Central SERVICE\_DOC.md
+## Central SERVICE_DOC.md
 
 ```md
 # Service Directory
 
 Lists all services, their purpose, owners, and links.
 
-| Service | Purpose | Owners | APIs | Status |
-|---|---|---|---|---|
-| creator-svc | Creator profile & lookup | @team-xyz | ./src/services/creator-svc/api | prod |
+| Service     | Purpose                  | Owners    | APIs                           | Status |
+| ----------- | ------------------------ | --------- | ------------------------------ | ------ |
+| creator-svc | Creator profile & lookup | @team-xyz | ./src/services/creator-svc/api | prod   |
 
 ## Authoring a New Service
+
 1. Create `src/services/<service-name>/` using the standard skeleton.
 2. Fill in `<service-name>/README.md` using the Service README template in **CLAUDE.md**.
 3. Add `docs/` and `infra/` at service-level as needed.
@@ -154,12 +160,12 @@ Lists all services, their purpose, owners, and links.
 
 Each service must include `README.md` with:
 
-* Purpose & contracts (API spec link, events)
-* Run (env vars, local dev, seed data)
-* Operations (dashboards, SLOs, runbooks)
-* Deployment (CI/CD, rollout flags)
-* Data (storage, retention, PII class)
-* Security (secrets, IAM roles, threat notes)
+- Purpose & contracts (API spec link, events)
+- Run (env vars, local dev, seed data)
+- Operations (dashboards, SLOs, runbooks)
+- Deployment (CI/CD, rollout flags)
+- Data (storage, retention, PII class)
+- Security (secrets, IAM roles, threat notes)
 
 > Use the **Service README Template** in **CLAUDE.md**.
 
@@ -167,17 +173,16 @@ Each service must include `README.md` with:
 
 ## Infra & Docs Placement
 
-* **Infra at two levels:**
+- **Infra at two levels:**
+  - **Root `infra/`** → environment-wide IaC (Terraform stacks, shared modules, CI/CD pipelines).
+  - **Service `infra/`** → service-scoped IaC (Helm charts, Terraform modules/variables specific to that service). Root pipelines should reference these modules.
 
-  * **Root `infra/`** → environment-wide IaC (Terraform stacks, shared modules, CI/CD pipelines).
-  * **Service `infra/`** → service-scoped IaC (Helm charts, Terraform modules/variables specific to that service). Root pipelines should reference these modules.
-* **Docs at two levels:**
-
-  * **Root `docs/`** → cross-cutting docs (ADR index, vendor guides, ops runbooks, platform overview).
-  * **Service `docs/`** → service-specific docs (SLOs, runbooks, sequence diagrams, local setup, API notes). Link each service doc from `SERVICE_DOC.md`.
+- **Docs at two levels:**
+  - **Root `docs/`** → cross-cutting docs (ADR index, vendor guides, ops runbooks, platform overview).
+  - **Service `docs/`** → service-specific docs (SLOs, runbooks, sequence diagrams, local setup, API notes). Link each service doc from `SERVICE_DOC.md`.
 
 ---
 
 ## Keep In Sync
 
-* This document is referenced by **CLAUDE.md**. Any changes here **must** be reflected there (and vice‑versa) via PR + ADR.
+- This document is referenced by **CLAUDE.md**. Any changes here **must** be reflected there (and vice‑versa) via PR + ADR.

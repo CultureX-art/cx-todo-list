@@ -1,9 +1,11 @@
 # Getting Started with AIPP
 
 ## Overview
+
 This guide walks you through your first AIPP (AI Pair Programming) implementation, from writing a PRD to deploying production-ready code through all 8 stages.
 
 ## Prerequisites
+
 - Node.js 18+
 - TypeScript knowledge
 - Basic understanding of your AI assistant capabilities
@@ -21,37 +23,45 @@ Create a new PRD using the template:
 
 ```markdown
 # PRD: User Profile Update Feature
+
 **Owner:** [Your Name] | **Date:** 2024-XX-XX
 
 ## Goal
+
 Allow users to update their profile information (name, email, bio) with validation and audit logging.
 
 ## Users & Value
+
 - Primary user: Authenticated application users
 - Value hypothesis: Users can maintain current profile data, improving engagement
 
 ## Acceptance Criteria (testable)
+
 1. **Given** authenticated user **When** they submit valid profile data **Then** profile is updated and success message shown
 2. **Given** invalid email format **When** user submits **Then** validation error displayed
 3. **Given** profile update **When** successful **Then** audit log entry created
 4. **Given** concurrent updates **When** multiple requests **Then** last-write-wins with proper conflict handling
 
 ## Non-Functional Requirements
+
 - Performance: P95 < 200ms for profile update endpoint
 - Security: Input validation, no PII in logs, audit trail for changes
 - Reliability: Idempotent updates, database transaction safety
 
 ## Constraints
+
 - Use existing User model and authentication middleware
 - Maintain backward compatibility with current API
 - Follow established error response format
 
 ## Out of Scope
+
 - Profile picture upload
 - Email verification workflow
 - Account deletion functionality
 
 ## Risks & Mitigations
+
 - **Risk**: Concurrent updates causing data loss
   **Mitigation**: Use database-level optimistic locking
 - **Risk**: Malicious input injection
@@ -65,17 +75,18 @@ Allow users to update their profile information (name, email, bio) with validati
 Present multiple approaches to your AI assistant:
 
 **Prompt Example:**
+
 ```
-I need to implement the user profile update feature described in the PRD. 
+I need to implement the user profile update feature described in the PRD.
 Consider these approaches:
 
 1. Direct database update with validation
-2. Event-sourced approach with profile update events  
+2. Event-sourced approach with profile update events
 3. CQRS pattern with separate read/write models
 
 Analyze each approach considering:
 - Implementation complexity
-- Performance implications  
+- Performance implications
 - Maintainability
 - Alignment with existing codebase patterns
 
@@ -114,26 +125,28 @@ export interface UpdateProfileOutput {
 
 /**
  * Updates user profile information with validation and audit logging.
- * 
+ *
  * Preconditions:
  * - userId must exist in database
  * - email must be valid format if provided
  * - user must be authenticated (handled by caller)
- * 
+ *
  * Postconditions:
  * - User profile updated in database
  * - Audit log entry created
  * - Response includes updated user data
- * 
+ *
  * Errors:
  * - UserError: Invalid input data or user not found
  * - SystemError: Database or audit service failures
- * 
+ *
  * @param input - Profile update data with correlation ID
  * @returns Promise resolving to updated user data and audit ID
  * @throws UserError on invalid input; SystemError on system failures
  */
-export async function updateUserProfile(input: UpdateProfileInput): Promise<UpdateProfileOutput> {
+export async function updateUserProfile(
+  input: UpdateProfileInput,
+): Promise<UpdateProfileOutput> {
   throw new Error("Not implemented (Stage 3)");
 }
 ```
@@ -145,11 +158,12 @@ export async function updateUserProfile(input: UpdateProfileInput): Promise<Upda
 ## Stage 4: Unit Tests First
 
 **Prompt for AI:**
+
 ```
 Generate comprehensive unit tests for the updateUserProfile function based on the interface contract.
 Cover:
 - Happy path with all fields
-- Happy path with partial updates  
+- Happy path with partial updates
 - Input validation errors
 - User not found scenarios
 - Database failure scenarios
@@ -159,53 +173,64 @@ Use table-driven tests where appropriate. Target ≥90% coverage.
 ```
 
 **Example Generated Test:**
+
 ```typescript
 // File: src/services/__tests__/userProfileService.test.ts
 
-import { updateUserProfile, UpdateProfileInput } from '../userProfileService';
-import { UserError, SystemError } from '../lib/errors';
+import { updateUserProfile, UpdateProfileInput } from "../userProfileService";
+import { UserError, SystemError } from "../lib/errors";
 
-describe('updateUserProfile', () => {
+describe("updateUserProfile", () => {
   const baseInput: UpdateProfileInput = {
-    userId: 'user-123',
-    correlationId: 'corr-456'
+    userId: "user-123",
+    correlationId: "corr-456",
   };
 
-  describe('happy path', () => {
+  describe("happy path", () => {
     test.each([
-      { 
-        scenario: 'full update',
-        input: { ...baseInput, name: 'John Doe', email: 'john@example.com', bio: 'Developer' }
+      {
+        scenario: "full update",
+        input: {
+          ...baseInput,
+          name: "John Doe",
+          email: "john@example.com",
+          bio: "Developer",
+        },
       },
-      { 
-        scenario: 'partial update - name only',
-        input: { ...baseInput, name: 'John Smith' }
+      {
+        scenario: "partial update - name only",
+        input: { ...baseInput, name: "John Smith" },
       },
-      { 
-        scenario: 'partial update - email only',
-        input: { ...baseInput, email: 'john.smith@example.com' }
-      }
-    ])('should update profile for $scenario', async ({ input }) => {
+      {
+        scenario: "partial update - email only",
+        input: { ...baseInput, email: "john.smith@example.com" },
+      },
+    ])("should update profile for $scenario", async ({ input }) => {
       // Will implement after Stage 5
-      await expect(updateUserProfile(input)).rejects.toThrow('Not implemented');
+      await expect(updateUserProfile(input)).rejects.toThrow("Not implemented");
     });
   });
 
-  describe('validation errors', () => {
+  describe("validation errors", () => {
     test.each([
-      { 
-        scenario: 'invalid email format',
-        input: { ...baseInput, email: 'invalid-email' },
-        expectedError: UserError
+      {
+        scenario: "invalid email format",
+        input: { ...baseInput, email: "invalid-email" },
+        expectedError: UserError,
       },
-      { 
-        scenario: 'empty userId',
-        input: { ...baseInput, userId: '' },
-        expectedError: UserError
-      }
-    ])('should throw $expectedError.name for $scenario', async ({ input, expectedError }) => {
-      await expect(updateUserProfile(input)).rejects.toBeInstanceOf(expectedError);
-    });
+      {
+        scenario: "empty userId",
+        input: { ...baseInput, userId: "" },
+        expectedError: UserError,
+      },
+    ])(
+      "should throw $expectedError.name for $scenario",
+      async ({ input, expectedError }) => {
+        await expect(updateUserProfile(input)).rejects.toBeInstanceOf(
+          expectedError,
+        );
+      },
+    );
   });
 });
 ```
@@ -215,6 +240,7 @@ describe('updateUserProfile', () => {
 ## Stage 5: Implementation to Green
 
 **Prompt for AI:**
+
 ```
 Implement the updateUserProfile function to make all unit tests pass.
 Follow these constraints:
@@ -229,6 +255,7 @@ Keep implementation ≤150 lines of code.
 ```
 
 **Review the AI's implementation** and ensure it:
+
 - ✅ Makes all tests pass
 - ✅ Follows error taxonomy (UserError/SystemError)
 - ✅ Includes proper logging with correlation IDs
@@ -239,6 +266,7 @@ Keep implementation ≤150 lines of code.
 ## Stage 6: Integration Tests
 
 **Prompt for AI:**
+
 ```
 Create integration tests for updateUserProfile that test the full stack:
 - HTTP endpoint → service → database
@@ -250,14 +278,15 @@ Create integration tests for updateUserProfile that test the full stack:
 ```
 
 **Example Integration Test:**
+
 ```typescript
 // File: src/routes/__tests__/userProfile.int.test.ts
 
-import request from 'supertest';
-import { buildApp } from '../../app';
-import { setupTestDatabase, cleanupTestDatabase } from '../../test/helpers';
+import request from "supertest";
+import { buildApp } from "../../app";
+import { setupTestDatabase, cleanupTestDatabase } from "../../test/helpers";
 
-describe('PUT /api/users/:userId/profile (integration)', () => {
+describe("PUT /api/users/:userId/profile (integration)", () => {
   let app: any;
 
   beforeAll(async () => {
@@ -269,18 +298,18 @@ describe('PUT /api/users/:userId/profile (integration)', () => {
     await cleanupTestDatabase();
   });
 
-  it('should update user profile successfully', async () => {
+  it("should update user profile successfully", async () => {
     const response = await request(app)
-      .put('/api/users/test-user-123/profile')
-      .set('Authorization', 'Bearer valid-token')
-      .set('x-correlation-id', 'int-test-456')
+      .put("/api/users/test-user-123/profile")
+      .set("Authorization", "Bearer valid-token")
+      .set("x-correlation-id", "int-test-456")
       .send({
-        name: 'Updated Name',
-        email: 'updated@example.com'
+        name: "Updated Name",
+        email: "updated@example.com",
       });
 
     expect(response.status).toBe(200);
-    expect(response.body.user.name).toBe('Updated Name');
+    expect(response.body.user.name).toBe("Updated Name");
     expect(response.body.auditId).toBeDefined();
   });
 });
@@ -291,11 +320,13 @@ describe('PUT /api/users/:userId/profile (integration)', () => {
 ## Stage 7: Integration to Green
 
 Run integration tests and fix any issues:
+
 ```bash
 npm run test:int
 ```
 
 Common fixes needed:
+
 - Database transaction handling
 - Authentication middleware integration
 - Error response formatting
@@ -306,6 +337,7 @@ Common fixes needed:
 ## Stage 8: Efficiency & Hardening
 
 **Prompt for AI:**
+
 ```
 Review the implementation for:
 1. Performance optimizations
@@ -317,6 +349,7 @@ Suggest specific optimizations while maintaining test compatibility.
 ```
 
 **Typical Stage 8 improvements:**
+
 - Add database indexes for query optimization
 - Implement caching for frequently accessed data
 - Add rate limiting for the endpoint
@@ -342,13 +375,17 @@ Before considering the feature complete:
 ## Deployment Readiness
 
 1. **Feature Flag Setup** (if using progressive rollout):
+
    ```typescript
-   const enableNewProfileUpdate = await featureFlags.isEnabled('profile-update-v2', userId);
+   const enableNewProfileUpdate = await featureFlags.isEnabled(
+     "profile-update-v2",
+     userId,
+   );
    ```
 
 2. **Monitoring Configuration**:
    - Error rate alerts
-   - Latency monitoring  
+   - Latency monitoring
    - Audit log verification
 
 3. **Rollback Plan**:

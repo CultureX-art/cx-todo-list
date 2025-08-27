@@ -1,21 +1,26 @@
 # Planning Stage Prompt
 
 ## ROLE
+
 Senior software architect generating multiple architectural approaches for evaluation.
 
 ## OBJECTIVE
+
 Generate 3-5 different architectural options for the given feature/requirement. Each option should explore different trade-offs in complexity, performance, scalability, and maintainability.
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
+
 - **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
 - **Naming:** kebab-case files/dirs, camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
 - **Database:** snake_case tables/columns, singular table names, forward-only migrations
 - **API:** Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
 
 ## INPUTS
+
 Paste the following:
+
 - Feature requirements/user story
-- Current system context/constraints  
+- Current system context/constraints
 - Performance/SLO requirements
 - Security/compliance requirements
 
@@ -26,36 +31,43 @@ Paste the following:
 For each architectural approach (3-5 options), provide:
 
 #### Option X: [Descriptive Name]
+
 **Philosophy:** One-sentence architectural philosophy (e.g., "Event-driven with async processing", "Monolithic with cached reads")
 
 **High-Level Design:**
+
 - Component diagram (ASCII or mermaid)
 - Data flow overview
 - Key technology choices
 
 **Trade-offs:**
+
 - **Pros:** What this approach excels at
 - **Cons:** Limitations and risks
 - **Complexity:** Development/operational complexity score (1-10)
 
 **Performance Characteristics:**
+
 - Expected latency profile
 - Scalability ceiling
 - Resource consumption pattern
 
 **Implementation Effort:**
+
 - Development timeline estimate
 - Required team skills
 - Migration complexity (if applicable)
 
 **Risk Profile:**
+
 - Technical risks
-- Operational risks  
+- Operational risks
 - Business risks
 
 ## ARCHITECTURAL PATTERNS TO CONSIDER
 
 ### Pattern Options:
+
 - **Monolithic:** Single deployable unit
 - **Microservices:** Service decomposition
 - **Event-Driven:** Async message-based
@@ -64,6 +76,7 @@ For each architectural approach (3-5 options), provide:
 - **Pipeline:** Sequential processing stages
 
 ### Data Patterns:
+
 - **Single Source of Truth:** Centralized data store
 - **Event Sourcing:** Immutable event log
 - **CQRS:** Separate read/write models
@@ -71,6 +84,7 @@ For each architectural approach (3-5 options), provide:
 - **Federated:** Distributed data ownership
 
 ### Scalability Patterns:
+
 - **Vertical:** Scale up resources
 - **Horizontal:** Scale out instances
 - **Sharding:** Data partitioning
@@ -78,7 +92,9 @@ For each architectural approach (3-5 options), provide:
 - **CDN:** Geographic distribution
 
 ## MANDATORY CONSTRAINTS
+
 Each option must respect:
+
 - **Backward Compatibility:** No breaking API changes
 - **Security:** Input validation, parameterized queries, no secrets in code
 - **Observability:** Structured JSON logs, correlation IDs, metrics
@@ -92,37 +108,45 @@ Each option must respect:
 # Architecture Options for [Feature Name]
 
 ## Requirements Summary
+
 [Brief restatement of requirements]
 
 ## Option 1: [Name]
+
 **Philosophy:** [One sentence]
 **Design:** [Component diagram + description]
 **Pros/Cons:** [Trade-offs]
-**Complexity:** [Score + rationale] 
+**Complexity:** [Score + rationale]
 **Performance:** [Characteristics]
 **Effort:** [Timeline + skills]
 **Risks:** [Key concerns]
 
 ## Option 2: [Name]
+
 [Same structure...]
 
 ## Option 3: [Name]
+
 [Same structure...]
 
 ## Comparison Matrix
-| Aspect | Option 1 | Option 2 | Option 3 |
-|--------|----------|----------|----------|
-| Complexity | X/10 | Y/10 | Z/10 |
-| Performance | [Brief] | [Brief] | [Brief] |
-| Timeline | [Estimate] | [Estimate] | [Estimate] |
-| Risk Level | [Low/Med/High] | [Low/Med/High] | [Low/Med/High] |
+
+| Aspect      | Option 1       | Option 2       | Option 3       |
+| ----------- | -------------- | -------------- | -------------- |
+| Complexity  | X/10           | Y/10           | Z/10           |
+| Performance | [Brief]        | [Brief]        | [Brief]        |
+| Timeline    | [Estimate]     | [Estimate]     | [Estimate]     |
+| Risk Level  | [Low/Med/High] | [Low/Med/High] | [Low/Med/High] |
 
 ## Recommendation for Thought Experiment
+
 [Which 1-2 options deserve deeper analysis and why]
 ```
 
 ## EVALUATION CRITERIA
+
 Rate each option on:
+
 - **Feasibility:** Can we build this with current team/timeline?
 - **Performance:** Will it meet SLO requirements?
 - **Maintainability:** Long-term operational burden

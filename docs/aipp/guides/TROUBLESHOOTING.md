@@ -5,12 +5,15 @@
 ### Stage 2: Thought Experimentation Issues
 
 #### Issue: AI Recommends Overly Complex Architecture
+
 **Symptoms:**
+
 - AI suggests microservices for simple features
 - Recommends enterprise patterns for small changes
 - Proposes technology stack changes
 
 **Solutions:**
+
 - Be specific about constraints in your prompt:
   ```
   Consider these constraints:
@@ -22,20 +25,25 @@
 - Request trade-off analysis between simple vs complex approaches
 
 #### Issue: AI Doesn't Consider Existing Codebase Patterns
+
 **Symptoms:**
+
 - Recommendations conflict with current architecture
 - Suggests different error handling than established patterns
 - Ignores existing utility functions
 
 **Solutions:**
+
 - Include relevant code snippets in your prompt:
+
   ```
   Our current error handling pattern:
   [paste existing error types]
-  
+
   Our current service pattern:
   [paste example service structure]
   ```
+
 - Ask AI to "follow existing patterns in this codebase"
 
 ---
@@ -43,24 +51,30 @@
 ### Stage 3: Interface Design Issues
 
 #### Issue: Interface Changes Required After Freeze
+
 **Symptoms:**
+
 - Tests reveal missing parameters
 - Integration requirements not captured
 - Return type insufficient for use cases
 
 **Solutions:**
+
 - **DO NOT** modify interfaces after freeze
 - Return to Stage 1/2 to reassess requirements
 - Use ADR to document why interface change is necessary
 - Regenerate affected tests after interface changes
 
 #### Issue: AI Generates Overly Generic Interfaces
+
 **Symptoms:**
+
 - Parameters typed as `any` or `unknown`
 - Missing validation constraints in types
 - Vague error descriptions
 
 **Solutions:**
+
 - Request specific types in your prompt:
   ```
   Generate TypeScript interfaces with:
@@ -75,12 +89,15 @@
 ### Stage 4: Unit Test Issues
 
 #### Issue: Tests Don't Cover Edge Cases
+
 **Symptoms:**
+
 - Missing boundary value tests
 - No error path testing
 - Insufficient mocking of dependencies
 
 **Solutions:**
+
 - Request specific test categories:
   ```
   Generate tests covering:
@@ -92,12 +109,15 @@
 - Use the test plan template to guide AI
 
 #### Issue: Tests Are Too Tightly Coupled to Implementation
+
 **Symptoms:**
+
 - Tests break when refactoring internal logic
 - Excessive mocking of internal functions
 - Tests verify implementation details not behavior
 
 **Solutions:**
+
 - Focus AI on testing public interfaces:
   ```
   Generate tests that:
@@ -107,12 +127,15 @@
   ```
 
 #### Issue: Flaky Tests Due to Async Operations
+
 **Symptoms:**
+
 - Tests pass/fail intermittently
 - Timeouts in CI/CD
 - Race conditions in setup/teardown
 
 **Solutions:**
+
 - Request proper async handling:
   ```
   Ensure all tests:
@@ -126,29 +149,37 @@
 ### Stage 5: Implementation Issues
 
 #### Issue: AI Implementation Doesn't Pass Its Own Tests
+
 **Symptoms:**
+
 - Generated code fails generated tests
 - Logic errors in implementation
 - Missing error handling
 
 **Solutions:**
+
 - Run tests immediately after implementation
 - Provide failing test output to AI for fixes:
+
   ```
   The implementation fails these tests:
   [paste test failures]
-  
+
   Fix the implementation to make all tests pass.
   ```
+
 - Break down complex functions into smaller pieces
 
 #### Issue: Code Exceeds 150 LOC Limit
+
 **Symptoms:**
+
 - Implementation is too complex
 - Multiple responsibilities in one function
 - Extensive inline validation
 
 **Solutions:**
+
 - Request refactoring:
   ```
   The function is >150 LOC. Refactor by:
@@ -158,12 +189,15 @@
   ```
 
 #### Issue: Security Vulnerabilities in Generated Code
+
 **Symptoms:**
+
 - SQL injection risks
 - Missing input sanitization
 - Secrets in code/logs
 
 **Solutions:**
+
 - Use security-focused prompts:
   ```
   Implement with security requirements:
@@ -178,12 +212,15 @@
 ### Stage 6-7: Integration Test Issues
 
 #### Issue: Integration Tests Fail Due to Environment Setup
+
 **Symptoms:**
+
 - Database connection errors
 - Missing test data
 - Authentication failures
 
 **Solutions:**
+
 - Verify test environment setup:
   ```bash
   npm run test:setup
@@ -194,12 +231,15 @@
 - Ensure test database is isolated from development
 
 #### Issue: Tests Pass Locally But Fail in CI
+
 **Symptoms:**
+
 - Different behavior in CI environment
 - Timing issues in automated tests
 - Resource constraints in CI
 
 **Solutions:**
+
 - Add CI-specific configuration
 - Use deterministic test data
 - Increase timeouts for CI environment:
@@ -212,12 +252,15 @@
 ### Stage 8: Performance and Production Issues
 
 #### Issue: Performance Degrades Under Load
+
 **Symptoms:**
+
 - Slow response times
 - Database query timeouts
 - Memory leaks
 
 **Solutions:**
+
 - Profile the implementation:
   ```bash
   npm run profile
@@ -232,12 +275,15 @@
   ```
 
 #### Issue: Monitoring Alerts in Production
+
 **Symptoms:**
+
 - High error rates
 - Latency spikes
 - Resource exhaustion
 
 **Solutions:**
+
 - Use operational tooling for rollback:
   ```bash
   # Emergency rollback
@@ -252,6 +298,7 @@
 ## AI Prompting Best Practices
 
 ### Effective Prompt Structure
+
 ```
 CONTEXT: Brief description of what you're building
 CONSTRAINTS: Technical limitations, existing patterns, performance requirements
@@ -266,9 +313,10 @@ VALIDATION: How to verify the result
 "Write a function to update users"
 
 **✅ Good Prompt:**
+
 ```
 CONTEXT: Building user profile update feature for Express/Sequelize app
-CONSTRAINTS: 
+CONSTRAINTS:
 - Must use existing User model
 - Follow established error patterns (UserError/SystemError)
 - Keep function under 150 LOC
@@ -288,16 +336,19 @@ VALIDATION: Implementation must pass these specific test cases:
 ## Getting Help
 
 ### Internal Resources
+
 1. **Code Review**: Use `ReviewerChecklist.md` for systematic review
 2. **Templates**: Reference all template files for guidance
 3. **Examples**: Check existing AIPP implementations in your codebase
 
 ### External Resources
+
 1. **AI Provider Documentation**: Understand your AI's capabilities and limitations
 2. **Stack-Specific Guides**: Framework documentation for implementation details
 3. **Security Resources**: OWASP guidelines, security scanning tools
 
 ### Escalation Path
+
 1. **Developer Discussion**: Team review of AI recommendations
 2. **Architecture Review**: For significant design decisions
 3. **Security Review**: For any security-sensitive changes
@@ -308,13 +359,16 @@ VALIDATION: Implementation must pass these specific test cases:
 ## Process Improvements
 
 ### Feedback Loop
+
 After completing features, document:
+
 - What prompts worked well
-- Common AI mistakes to avoid  
+- Common AI mistakes to avoid
 - Template improvements needed
 - Process bottlenecks encountered
 
 ### Team Learning
+
 - Share effective prompts with team
 - Create team-specific troubleshooting addendums
 - Regular retrospectives on AIPP effectiveness

@@ -37,32 +37,41 @@ aipp/
 ## 🚀 8-Stage Development Process
 
 ### Stage 1: Thought Experiment
+
 Define clear business requirements and explore multiple architectural solutions through rigorous thought experiments. Conduct scenario analysis, risk assessment, and make final architecture selection.
 
-### Stage 2: Planning  
+### Stage 2: Planning
+
 Generate multiple architectural approaches with detailed trade-off analysis. Create complete specifications including API design, database schema, and implementation roadmap.
 
 ### Stage 3: Interface Freeze
+
 Transform finalized architecture into frozen, documented interfaces with comprehensive type definitions. Create API contracts, database schemas, and service interfaces that serve as implementation contracts.
 
 ### Stage 4: Unit Test Generation
+
 Generate comprehensive unit test suites for all frozen interfaces. Create table-driven tests, mocks, fixtures, and test utilities ensuring 100% interface compliance.
 
 ### Stage 5: Code Generation
+
 Implement production-ready code following TDD principles. Generate complete implementation that passes all unit tests while adhering to frozen interfaces from Stage 3.
 
-### Stage 6: Integration Test Generation  
+### Stage 6: Integration Test Generation
+
 Create comprehensive integration test suites validating end-to-end functionality, database operations, external services, and complete user workflows.
 
 ### Stage 7: Integration Implementation
+
 Iteratively enhance implementation to pass ALL integration tests while maintaining 100% unit test compliance. Fix integration issues without breaking existing functionality.
 
 ### Stage 8: Performance & Security Hardening
+
 Conduct comprehensive performance optimization and security hardening. Ensure scalability readiness, eliminate inefficiencies, and validate SLA compliance with automatic flagging of unresolvable issues.
 
 ## ⚡ Quick Start
 
 1. **Setup the framework:**
+
    ```bash
    # Copy the AIPP framework to your project
    cp -r docs/aipp /path/to/your/project/
@@ -77,9 +86,11 @@ Conduct comprehensive performance optimization and security hardening. Ensure sc
 ## 🔑 Key Features
 
 ### Interface Freeze Rule
+
 Any change to public interfaces after Stage 3 requires returning to Stage 3, re-approval, and regenerating affected tests. This is enforced through automated tooling.
 
 ### Quality Gates
+
 - **Unit Test Coverage**: ≥90% line coverage
 - **Mutation Score**: ≥60% mutation test coverage
 - **Integration Tests**: Comprehensive API and database testing
@@ -87,6 +98,7 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 - **Performance Benchmarks**: P95 < 500ms response time
 
 ### Audit Trail System
+
 - Complete prompt versioning and tracking
 - AI model response logging
 - Decision record database
@@ -96,17 +108,20 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 ## 📊 Metrics & Success Criteria
 
 ### Development Velocity
+
 - 30% reduction in development time for pilot features
 - 90% of PRs pass quality checks on first review
 - <2 days average PR cycle time
 
 ### Code Quality
+
 - Zero critical security issues in AI-generated code
 - ≥90% test coverage on all new code
 - ≥60% mutation test score
 - Developer satisfaction score ≥4/5
 
 ### Production Readiness
+
 - 99.9% availability target
 - <1% error rate
 - P95 response time <500ms
@@ -115,6 +130,7 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 ## 🛠️ Tools & Integrations
 
 ### Testing
+
 - **Jest**: Unit and integration testing
 - **Stryker**: Mutation testing
 - **fast-check**: Property-based testing
@@ -122,12 +138,14 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 - **Artillery/K6**: Load testing
 
 ### Security
+
 - **Semgrep**: Static analysis
 - **CodeQL**: Security scanning
 - **Snyk**: Dependency scanning
 - **OWASP ZAP**: Dynamic security testing
 
 ### Performance
+
 - **Clinic.js**: Node.js performance profiling
 - **Lighthouse**: Frontend performance
 - **webpack-bundle-analyzer**: Bundle optimization
@@ -135,21 +153,25 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 ## 🚦 Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1-2)
+
 - Set up AIPP framework in your repository
 - Train team on 8-stage process
 - Run pilot with 2 low-risk features
 
 ### Phase 2: Automation (Week 3-4)
+
 - Implement interface freeze tooling
 - Set up quality gates
 - Configure audit trail system
 
 ### Phase 3: Scaling (Week 5-6)
+
 - Expand to full team adoption
 - Integrate CI/CD pipelines
 - Implement monitoring dashboard
 
 ### Phase 4: Optimization (Week 7-8)
+
 - Analyze metrics and feedback
 - Optimize prompts and processes
 - Document best practices
@@ -157,12 +179,14 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 ## 📚 Documentation
 
 ### Core Documentation
+
 - **[Getting Started Guide](guides/GETTING_STARTED.md)**: Step-by-step setup instructions
 - **[Operational Tooling](guides/OperationalTooling.md)**: Production deployment guide
 - **[Troubleshooting](guides/TROUBLESHOOTING.md)**: Common issues and solutions
 - **[Security Guidelines](SECURITY.md)**: Security best practices
 
 ### Stage-Specific Prompts
+
 - **[Stage 1 Prompt](prompts/thought-experiment.prompt.md)**: Thought experiment and requirement analysis
 - **[Stage 2 Prompt](prompts/planning.prompt.md)**: Architecture planning and specification
 - **[Stage 3 Prompt](prompts/interface-freeze.prompt.md)**: Interface definition and freezing
@@ -175,6 +199,7 @@ Any change to public interfaces after Stage 3 requires returning to Stage 3, re-
 ## 🤝 Contributing
 
 To contribute to the AIPP framework:
+
 1. Follow the 8-stage process for any changes
 2. Ensure all quality gates pass
 3. Update relevant documentation

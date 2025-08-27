@@ -1,12 +1,15 @@
 # Interface Freeze Stage Prompt
 
 ## ROLE
+
 Senior software architect translating system designs into concrete, frozen interfaces with comprehensive documentation.
 
 ## OBJECTIVE
+
 Transform the finalized architecture specification from Stage 2 into concrete, documented interfaces that serve as the implementation contract. Create type-safe interfaces that adheres to API contracts, database schemas, and configuration specifications from stage 2.
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
+
 - **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
 - **Naming:** kebab-case files/dirs, camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
 - **Database:** snake_case tables/columns, singular table names, forward-only migrations
@@ -14,10 +17,12 @@ Transform the finalized architecture specification from Stage 2 into concrete, d
 - **Logging:** JSON structured logs {level, msg, service, env, correlationId, timestamp}
 
 ## INPUTS
+
 Paste the following from Stage 2 Planning output:
+
 - Final selected architecture specification
 - Component design and data flow
-- API contract definition  
+- API contract definition
 - Database schema design
 - Configuration requirements
 - Vendor integrations (if any)
@@ -29,6 +34,7 @@ Paste the following from Stage 2 Planning output:
 Create complete OpenAPI 3.0 specification with:
 
 #### REST Endpoints
+
 ```yaml
 # Complete OpenAPI spec with all endpoints
 openapi: 3.0.3
@@ -75,7 +81,7 @@ components:
           type: string
           enum: [basic, premium, enterprise]
           description: Resource tier type
-    
+
     ResourceResponse:
       type: object
       required: [id, name, type, createdAt]
@@ -95,7 +101,7 @@ components:
           type: string
           format: date-time
           description: ISO 8601 creation timestamp
-  
+
   responses:
     BadRequest:
       description: Invalid request parameters
@@ -103,14 +109,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    
+
     InternalError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    
+
     ErrorResponse:
       type: object
       required: [error]
@@ -137,18 +143,18 @@ components:
 ```
 
 #### Request/Response Type Definitions
+
 ```typescript
 // Complete TypeScript interfaces for all API contracts
 
 // Request Types
 interface CreateResourceRequest<T> {
-
   /** Resource */
   resource: T;
 
   /** Resource created by */
   by: User;
-  
+
   /** Optional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -156,22 +162,21 @@ interface CreateResourceRequest<T> {
 interface UpdateResourceRequest<T> {
   /** Partial Resource */
   resource: Partial<T>;
-  
+
   /** Resource updated by */
   by: User;
-  
+
   /** Updated metadata */
   metadata?: Record<string, unknown>;
 }
 
-
 interface ApiResponse {
-  transaction_id: string;         // mirrors X-Request-Id / traceparent
-  message: string;                // e.g., "OK", "Created", or human context
-  time_taken_ms?: number;         // optional; mirrors X-Response-Time
-  data?: TData;                    // resource | array | null
-  meta?: TMeta;  
-  error?: ApiError
+  transaction_id: string; // mirrors X-Request-Id / traceparent
+  message: string; // e.g., "OK", "Created", or human context
+  time_taken_ms?: number; // optional; mirrors X-Response-Time
+  data?: TData; // resource | array | null
+  meta?: TMeta;
+  error?: ApiError;
 }
 
 // Error Types
@@ -181,8 +186,8 @@ interface ApiError {
   detail?: string;
   type?: string;
   instance?: string;
-  code?: string;             // machine code
-  transaction_id?: string;   // mirror header
+  code?: string; // machine code
+  transaction_id?: string; // mirror header
   time_taken_ms?: number;
   details?: Array<{
     message: string;
@@ -202,25 +207,25 @@ Create complete SQL schema with constraints and documentation:
 CREATE TABLE resource (
   -- Primary identifier
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  
-  -- Business fields  
+
+  -- Business fields
   name VARCHAR(255) NOT NULL COMMENT 'Resource display name',
   type ENUM('basic', 'premium', 'enterprise') NOT NULL COMMENT 'Resource tier type',
-  
+
   -- JSON metadata storage
   metadata JSON NULL COMMENT 'Flexible metadata storage',
-  
+
   -- Standard audit fields
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
   deleted_at TIMESTAMP NULL COMMENT 'Soft delete timestamp',
-  
+
   -- Constraints
   CONSTRAINT chk_resource_name_length CHECK (CHAR_LENGTH(name) BETWEEN 1 AND 255),
   CONSTRAINT chk_resource_type_valid CHECK (type IN ('basic', 'premium', 'enterprise'))
-) ENGINE=InnoDB 
-  DEFAULT CHARSET=utf8mb4 
-  COLLATE=utf8mb4_unicode_ci 
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci
   COMMENT='Primary resource storage table';
 
 
@@ -236,6 +241,7 @@ CREATE INDEX idx_resource_type_created ON resource(type, created_at) COMMENT 'Ty
 ```
 
 #### Database Model Interfaces
+
 ```typescript
 // Database model interfaces with ORM mapping
 
@@ -245,7 +251,7 @@ interface ResourceModel {
   /** Resource display name */
   name: string;
   /** Resource tier type */
-  type: 'basic' | 'premium' | 'enterprise';
+  type: "basic" | "premium" | "enterprise";
   /** JSON metadata storage */
   metadata: Record<string, unknown> | null;
   /** Creation timestamp */
@@ -260,7 +266,7 @@ interface ResourceModel {
 interface ResourceAttributes {
   id: number;
   name: string;
-  type: 'basic' | 'premium' | 'enterprise';
+  type: "basic" | "premium" | "enterprise";
   metadata: Record<string, unknown> | null;
   createdAt: Date;
   updatedAt: Date;
@@ -269,7 +275,7 @@ interface ResourceAttributes {
 
 interface ResourceCreationAttributes {
   name: string;
-  type: 'basic' | 'premium' | 'enterprise';
+  type: "basic" | "premium" | "enterprise";
   metadata?: Record<string, unknown> | null;
 }
 ```
@@ -307,7 +313,10 @@ interface ResourceService {
    * @throws {NotFoundError} When resource doesn't exist
    * @throws {ValidationError} When input validation fails
    */
-  updateResource(id: number, request: UpdateResourceRequest): Promise<ResourceResponse>;
+  updateResource(
+    id: number,
+    request: UpdateResourceRequest,
+  ): Promise<ResourceResponse>;
 
   /**
    * Soft delete resource
@@ -331,13 +340,13 @@ interface ResourceListOptions {
   /** Items per page (default: 20, max: 100) */
   limit?: number;
   /** Filter by resource type */
-  type?: 'basic' | 'premium' | 'enterprise';
+  type?: "basic" | "premium" | "enterprise";
   /** Search by name (partial match) */
   nameSearch?: string;
   /** Sort by field */
-  sortBy?: 'name' | 'createdAt' | 'updatedAt';
+  sortBy?: "name" | "createdAt" | "updatedAt";
   /** Sort direction */
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // Repository interface for data access
@@ -362,7 +371,10 @@ interface ResourceRepository {
    * @param updates - Fields to update
    * @returns Promise resolving to updated resource model
    */
-  update(id: number, updates: Partial<ResourceCreationAttributes>): Promise<ResourceModel>;
+  update(
+    id: number,
+    updates: Partial<ResourceCreationAttributes>,
+  ): Promise<ResourceModel>;
 
   /**
    * Soft delete resource by primary key
@@ -395,7 +407,7 @@ interface AppConfig {
   server: ServerConfig;
   /** Database configuration */
   database: DatabaseConfig;
-  /** Logging configuration */  
+  /** Logging configuration */
   logging: LoggingConfig;
   /** Feature flags */
   features: FeatureConfig;
@@ -409,7 +421,7 @@ interface ServerConfig {
   /** Server host binding */
   host: string;
   /** Environment name */
-  env: 'development' | 'testing' | 'staging' | 'production';
+  env: "development" | "testing" | "staging" | "production";
   /** Request timeout in milliseconds */
   requestTimeout: number;
   /** Maximum request payload size */
@@ -444,9 +456,9 @@ interface DatabaseConfig {
 
 interface LoggingConfig {
   /** Log level */
-  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  level: "debug" | "info" | "warn" | "error" | "fatal";
   /** Log format */
-  format: 'json' | 'text';
+  format: "json" | "text";
   /** Service name for structured logs */
   service: string;
   /** Correlation ID header name */
@@ -497,7 +509,7 @@ interface S3StorageInterface {
   uploadFile(
     key: string,
     content: Buffer | string,
-    metadata?: Record<string, string>
+    metadata?: Record<string, string>,
   ): Promise<S3UploadResult>;
 
   /**
@@ -538,6 +550,7 @@ interface S3UploadResult {
 ## MANDATORY VALIDATION CHECKLIST
 
 ### Interface Completeness
+
 - [ ] All API endpoints have complete OpenAPI definitions
 - [ ] All request/response types are strongly typed
 - [ ] All database tables have complete schema definitions
@@ -546,6 +559,7 @@ interface S3UploadResult {
 - [ ] All error scenarios have defined error types
 
 ### Documentation Standards
+
 - [ ] Every interface method has TSDoc comments
 - [ ] Parameter types and constraints are documented
 - [ ] Return types and error conditions are specified
@@ -553,6 +567,7 @@ interface S3UploadResult {
 - [ ] Database constraints match application logic
 
 ### Type Safety
+
 - [ ] No `any` types in interface definitions
 - [ ] Enums used instead of string literals where appropriate
 - [ ] Optional vs required fields clearly marked
@@ -560,6 +575,7 @@ interface S3UploadResult {
 - [ ] Union types used appropriately
 
 ### Security Compliance
+
 - [ ] No sensitive data in interface examples
 - [ ] Input validation constraints defined
 - [ ] Authentication/authorization requirements documented
@@ -567,30 +583,35 @@ interface S3UploadResult {
 
 ## FINAL OUTPUT FORMAT
 
-```markdown
+````markdown
 # Interface Freeze: [Feature Name]
 
 ## Executive Summary
+
 **Frozen Interfaces:** [Count] API endpoints, [Count] database tables, [Count] service interfaces
 **Documentation Status:** Complete with TSDoc comments and constraints
 **Type Safety:** 100% strongly typed, no `any` types
 
 ## API Contract (OpenAPI 3.0)
+
 ```yaml
 [Complete OpenAPI specification]
 ```
+````
 
 ## Database Schema (SQL DDL)
+
 ```sql
 [Complete SQL schema with all tables, indexes, constraints]
 ```
 
 ## TypeScript Interface Definitions
+
 ```typescript
 // API Types
 [All request/response interfaces]
 
-// Service Types  
+// Service Types
 [All business logic service interfaces]
 
 // Repository Types
@@ -604,6 +625,7 @@ interface S3UploadResult {
 ```
 
 ## Implementation Contract
+
 - **API Stability:** These endpoint signatures are frozen and backward-compatible
 - **Database Schema:** Migration scripts must maintain these constraints
 - **Service Interfaces:** Business logic must implement these exact method signatures
@@ -611,16 +633,19 @@ interface S3UploadResult {
 - **Documentation:** All implementations must maintain TSDoc compatibility
 
 ## Validation Results
+
 - ✅ Interface completeness check passed
-- ✅ Documentation standards check passed  
+- ✅ Documentation standards check passed
 - ✅ Type safety check passed
 - ✅ Security compliance check passed
 
 ## Next Steps
+
 - Interfaces are frozen and ready for parallel implementation
 - Generate implementation scaffolding from interfaces
 - Begin test-driven development against interface contracts
 - Set up continuous integration to validate interface compliance
+
 ```
 
 ## INTERFACE FREEZE RULES
@@ -634,9 +659,10 @@ interface S3UploadResult {
 
 ## SUCCESS CRITERIA
 - [ ] 100% of system boundaries have frozen, documented interfaces
-- [ ] All interfaces are strongly typed with comprehensive documentation  
+- [ ] All interfaces are strongly typed with comprehensive documentation
 - [ ] API contracts are complete and validation-ready
 - [ ] Database schemas are fully specified with constraints
 - [ ] Configuration interfaces cover all environment variables
 - [ ] Vendor integrations have complete interface definitions
 - [ ] Implementation teams can begin parallel development
+```

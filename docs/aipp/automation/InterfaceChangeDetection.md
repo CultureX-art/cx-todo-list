@@ -1,11 +1,13 @@
 # Interface Change Detection Tools
 
 ## Overview
+
 Automated tools to enforce the Interface Freeze Rule: any change to public interfaces after Stage 3 requires returning to Stage 3, re-approval, and regenerating affected tests.
 
 ## Pre-commit Hook Setup
 
 ### 1. Interface Hash Generator
+
 Create a hash of all interface definitions to detect changes:
 
 ```bash
@@ -25,6 +27,7 @@ echo "Interface hash generated: $INTERFACE_HASH"
 ```
 
 ### 2. Interface Change Validator
+
 Pre-commit hook to prevent unauthorized interface changes:
 
 ```bash
@@ -35,10 +38,10 @@ Pre-commit hook to prevent unauthorized interface changes:
 if [ -f ".aipp/interface-freeze.json" ]; then
     # Calculate current interface hash
     CURRENT_HASH=$(find src -name "*.interface.ts" -o -name "*.contract.ts" -o -name "*Pact.ts" | xargs cat | sha256sum | cut -d' ' -f1)
-    
+
     # Get frozen hash
     FROZEN_HASH=$(jq -r '.hash' .aipp/interface-freeze.json)
-    
+
     if [ "$CURRENT_HASH" != "$FROZEN_HASH" ]; then
         echo "❌ INTERFACE FREEZE VIOLATION DETECTED"
         echo "Interfaces have been modified after Stage 3 freeze."
@@ -59,90 +62,102 @@ npm run test:unit
 ## Contract Testing Framework
 
 ### 1. Interface Contract Tests
+
 Automatically generated contract tests for all public interfaces:
 
 ```typescript
 // tests/contracts/interface.contract.test.ts
-import { ExampleInput, ExampleOutput, listUserItems } from '../src/interfaces/ExamplePact';
+import {
+  ExampleInput,
+  ExampleOutput,
+  listUserItems,
+} from "../src/interfaces/ExamplePact";
 
-describe('Interface Contract: listUserItems', () => {
-  describe('Input Validation', () => {
-    it('should accept valid input structure', () => {
+describe("Interface Contract: listUserItems", () => {
+  describe("Input Validation", () => {
+    it("should accept valid input structure", () => {
       const validInput: ExampleInput = {
-        userId: 'user-123',
+        userId: "user-123",
         limit: 50,
-        correlationId: 'corr-456'
+        correlationId: "corr-456",
       };
-      
+
       expect(() => validateInput(validInput)).not.toThrow();
     });
 
-    it('should reject invalid userId', () => {
+    it("should reject invalid userId", () => {
       const invalidInput = {
-        userId: '', // Invalid: empty string
-        correlationId: 'corr-456'
+        userId: "", // Invalid: empty string
+        correlationId: "corr-456",
       };
-      
-      expect(() => validateInput(invalidInput)).toThrow('Invalid userId');
+
+      expect(() => validateInput(invalidInput)).toThrow("Invalid userId");
     });
 
-    it('should reject invalid limit range', () => {
+    it("should reject invalid limit range", () => {
       const invalidInput: ExampleInput = {
-        userId: 'user-123',
+        userId: "user-123",
         limit: 101, // Invalid: exceeds max 100
-        correlationId: 'corr-456'
+        correlationId: "corr-456",
       };
-      
-      expect(() => validateInput(invalidInput)).toThrow('Limit must be between 1 and 100');
+
+      expect(() => validateInput(invalidInput)).toThrow(
+        "Limit must be between 1 and 100",
+      );
     });
   });
 
-  describe('Output Contract', () => {
-    it('should return valid output structure', async () => {
+  describe("Output Contract", () => {
+    it("should return valid output structure", async () => {
       const mockOutput: ExampleOutput = {
         items: [
-          { id: 'item-1', title: 'Test Item', createdAt: '2023-01-01T00:00:00Z' }
+          {
+            id: "item-1",
+            title: "Test Item",
+            createdAt: "2023-01-01T00:00:00Z",
+          },
         ],
-        nextCursor: 'cursor-123'
+        nextCursor: "cursor-123",
       };
-      
+
       expect(validateOutput(mockOutput)).toBe(true);
     });
 
-    it('should handle empty results', async () => {
+    it("should handle empty results", async () => {
       const emptyOutput: ExampleOutput = {
-        items: []
+        items: [],
       };
-      
+
       expect(validateOutput(emptyOutput)).toBe(true);
     });
   });
 
-  describe('Error Contracts', () => {
-    it('should throw UserError for invalid input', async () => {
-      const invalidInput = { userId: '', correlationId: 'test' };
-      
-      await expect(listUserItems(invalidInput))
-        .rejects.toThrow(UserError);
+  describe("Error Contracts", () => {
+    it("should throw UserError for invalid input", async () => {
+      const invalidInput = { userId: "", correlationId: "test" };
+
+      await expect(listUserItems(invalidInput)).rejects.toThrow(UserError);
     });
 
-    it('should throw SystemError for transient failures', async () => {
+    it("should throw SystemError for transient failures", async () => {
       // Mock system failure scenario
-      jest.spyOn(database, 'query').mockRejectedValue(new Error('Connection timeout'));
-      
+      jest
+        .spyOn(database, "query")
+        .mockRejectedValue(new Error("Connection timeout"));
+
       const validInput: ExampleInput = {
-        userId: 'user-123',
-        correlationId: 'test'
+        userId: "user-123",
+        correlationId: "test",
       };
-      
-      await expect(listUserItems(validInput))
-        .rejects.toThrow(SystemError);
+
+      await expect(listUserItems(validInput)).rejects.toThrow(SystemError);
     });
   });
 });
 ```
 
 ### 2. Backward Compatibility Checker
+
 Tool to verify new interface versions maintain backward compatibility:
 
 ```typescript
@@ -155,12 +170,12 @@ interface CompatibilityReport {
 
 export function checkBackwardCompatibility(
   oldInterface: any,
-  newInterface: any
+  newInterface: any,
 ): CompatibilityReport {
   const report: CompatibilityReport = {
     compatible: true,
     breakingChanges: [],
-    warnings: []
+    warnings: [],
   };
 
   // Check for removed properties
@@ -218,30 +233,30 @@ name: Interface Freeze Validation
 on:
   pull_request:
     paths:
-      - 'src/**/*.interface.ts'
-      - 'src/**/*.contract.ts'
-      - 'src/**/*Pact.ts'
+      - "src/**/*.interface.ts"
+      - "src/**/*.contract.ts"
+      - "src/**/*Pact.ts"
 
 jobs:
   check-interface-freeze:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          
+          node-version: "18"
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Check interface freeze compliance
         run: npm run aipp:check-interfaces
-        
+
       - name: Run contract tests
         run: npm run aipp:contract-tests
-        
+
       - name: Check backward compatibility
         run: npm run aipp:compatibility-check
 ```
@@ -249,6 +264,7 @@ jobs:
 ## IDE Integration
 
 ### VS Code Extension Configuration
+
 ```json
 // .vscode/settings.json
 {
@@ -259,20 +275,22 @@ jobs:
   },
   "typescript.preferences.readonly": [
     "**/*.interface.ts",
-    "**/*.contract.ts", 
+    "**/*.contract.ts",
     "**/*Pact.ts"
   ]
 }
 ```
 
 ### Interface Freeze Status Bar
+
 ```typescript
 // .vscode/extensions/aipp/src/interface-status.ts
 export function showInterfaceFreezeStatus() {
   const statusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left, 100
+    vscode.StatusBarAlignment.Left,
+    100,
   );
-  
+
   if (isInterfaceFrozen()) {
     statusBarItem.text = "🔒 Interfaces Frozen (Stage 3+)";
     statusBarItem.color = "#ff6b6b";
@@ -280,7 +298,7 @@ export function showInterfaceFreezeStatus() {
     statusBarItem.text = "🔓 Interfaces Editable (Stage 1-2)";
     statusBarItem.color = "#51cf66";
   }
-  
+
   statusBarItem.show();
 }
 ```

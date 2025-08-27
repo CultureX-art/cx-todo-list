@@ -1,6 +1,7 @@
 # Stage 8: Performance & Security Hardening
 
 ## Overview
+
 Stage 8 focuses on optimization and security hardening after core functionality is complete. This stage ensures production readiness through systematic performance analysis and security controls.
 
 ## Performance Optimization Framework
@@ -8,10 +9,11 @@ Stage 8 focuses on optimization and security hardening after core functionality 
 ### Performance Profiling Tools
 
 #### Node.js Application Profiling
+
 ```javascript
 // scripts/performance/profiler.js
-const clinic = require('@clinic/doctor');
-const autocannon = require('autocannon');
+const clinic = require("@clinic/doctor");
+const autocannon = require("autocannon");
 
 class PerformanceProfiler {
   constructor(appPath, port = 3000) {
@@ -21,21 +23,21 @@ class PerformanceProfiler {
   }
 
   async profileCPU() {
-    console.log('Starting CPU profiling...');
-    
+    console.log("Starting CPU profiling...");
+
     return new Promise((resolve, reject) => {
       const doctor = clinic.doctor({
-        dest: './performance-reports/cpu'
+        dest: "./performance-reports/cpu",
       });
 
-      doctor.spawn(['node', this.appPath], (err, proc) => {
+      doctor.spawn(["node", this.appPath], (err, proc) => {
         if (err) return reject(err);
 
         // Wait for app to start
         setTimeout(async () => {
           try {
-            await this.runLoadTest('cpu-profile');
-            proc.kill('SIGINT');
+            await this.runLoadTest("cpu-profile");
+            proc.kill("SIGINT");
             resolve();
           } catch (error) {
             reject(error);
@@ -46,21 +48,25 @@ class PerformanceProfiler {
   }
 
   async profileMemory() {
-    console.log('Starting memory profiling...');
-    
-    const heapdump = require('heapdump');
+    console.log("Starting memory profiling...");
+
+    const heapdump = require("heapdump");
     const startTime = Date.now();
-    
+
     // Take baseline heap snapshot
-    heapdump.writeSnapshot(`./performance-reports/memory/baseline-${startTime}.heapsnapshot`);
-    
+    heapdump.writeSnapshot(
+      `./performance-reports/memory/baseline-${startTime}.heapsnapshot`,
+    );
+
     // Run load test
-    await this.runLoadTest('memory-profile');
-    
+    await this.runLoadTest("memory-profile");
+
     // Take post-load heap snapshot
-    heapdump.writeSnapshot(`./performance-reports/memory/postload-${startTime}.heapsnapshot`);
-    
-    console.log('Memory snapshots saved to ./performance-reports/memory/');
+    heapdump.writeSnapshot(
+      `./performance-reports/memory/postload-${startTime}.heapsnapshot`,
+    );
+
+    console.log("Memory snapshots saved to ./performance-reports/memory/");
   }
 
   async runLoadTest(testName) {
@@ -70,27 +76,27 @@ class PerformanceProfiler {
       duration: 30,
       requests: [
         {
-          method: 'GET',
-          path: '/health'
+          method: "GET",
+          path: "/health",
         },
         {
-          method: 'GET',
-          path: '/users/test-user/items'
-        }
-      ]
+          method: "GET",
+          path: "/users/test-user/items",
+        },
+      ],
     });
 
     return new Promise((resolve, reject) => {
       autocannon.track(instance);
-      
-      instance.on('done', (result) => {
+
+      instance.on("done", (result) => {
         console.log(`Load test ${testName} completed:`);
         console.log(`RPS: ${result.requests.average}`);
         console.log(`Latency P95: ${result.latency.p95}ms`);
         resolve(result);
       });
 
-      instance.on('error', reject);
+      instance.on("error", reject);
     });
   }
 }
@@ -99,9 +105,10 @@ module.exports = PerformanceProfiler;
 ```
 
 #### Database Query Analysis
+
 ```typescript
 // scripts/performance/database-analyzer.ts
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export class DatabaseAnalyzer {
   constructor(private pool: Pool) {}
@@ -121,11 +128,11 @@ export class DatabaseAnalyzer {
       LIMIT 20;
     `);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       query: row.query,
       avgExecutionTime: parseFloat(row.mean_time),
       callCount: parseInt(row.calls),
-      cacheHitRatio: parseFloat(row.hit_percent) || 0
+      cacheHitRatio: parseFloat(row.hit_percent) || 0,
     }));
   }
 
@@ -154,38 +161,55 @@ export class DatabaseAnalyzer {
 # Database Performance Report
 
 ## Slow Queries (>10 calls)
-${slowQueries.map(q => `
+${slowQueries
+  .map(
+    (q) => `
 - **Query**: \`${q.query.substring(0, 100)}...\`
 - **Avg Time**: ${q.avgExecutionTime.toFixed(2)}ms
 - **Call Count**: ${q.callCount}
 - **Cache Hit**: ${q.cacheHitRatio.toFixed(1)}%
-`).join('\n')}
+`,
+  )
+  .join("\n")}
 
 ## Unused Indexes
-${unusedIndexes.map(idx => `
+${unusedIndexes
+  .map(
+    (idx) => `
 - **Table**: ${idx.tablename}
 - **Index**: ${idx.indexname}
 - **Scan Count**: ${idx.idx_scan}
-`).join('\n')}
+`,
+  )
+  .join("\n")}
 
 ## Recommendations
 ${this.generateRecommendations(slowQueries, unusedIndexes)}
     `;
   }
 
-  private generateRecommendations(slowQueries: SlowQuery[], unusedIndexes: any[]): string {
+  private generateRecommendations(
+    slowQueries: SlowQuery[],
+    unusedIndexes: any[],
+  ): string {
     const recommendations: string[] = [];
 
     if (slowQueries.length > 0) {
-      recommendations.push('- Review and optimize slow queries with EXPLAIN ANALYZE');
-      recommendations.push('- Consider adding indexes for frequently queried columns');
+      recommendations.push(
+        "- Review and optimize slow queries with EXPLAIN ANALYZE",
+      );
+      recommendations.push(
+        "- Consider adding indexes for frequently queried columns",
+      );
     }
 
     if (unusedIndexes.length > 0) {
-      recommendations.push('- Remove unused indexes to improve write performance');
+      recommendations.push(
+        "- Remove unused indexes to improve write performance",
+      );
     }
 
-    return recommendations.join('\n');
+    return recommendations.join("\n");
   }
 }
 
@@ -200,7 +224,9 @@ interface SlowQuery {
 ### Performance Optimization Checklist
 
 #### Application Layer
+
 - [ ] **Bundle Analysis**: Analyze and minimize JavaScript bundle size
+
   ```bash
   npm run build:analyze
   webpack-bundle-analyzer dist/static/js/*.js
@@ -212,6 +238,7 @@ interface SlowQuery {
 - [ ] **Image Optimization**: Compress and serve images in modern formats (WebP, AVIF)
 
 #### API Performance
+
 - [ ] **Response Compression**: Enable gzip/brotli compression
 - [ ] **Connection Pooling**: Optimize database connection pool settings
 - [ ] **Query Optimization**: Review and optimize all database queries
@@ -219,6 +246,7 @@ interface SlowQuery {
 - [ ] **Rate Limiting**: Implement rate limiting to prevent abuse
 
 #### Infrastructure
+
 - [ ] **CDN Setup**: Configure CDN for static assets
 - [ ] **Load Balancing**: Configure load balancer with health checks
 - [ ] **Auto-scaling**: Set up horizontal pod autoscaling
@@ -229,6 +257,7 @@ interface SlowQuery {
 ### Security Scanning Tools
 
 #### SAST (Static Application Security Testing)
+
 ```yaml
 # .github/workflows/security-scan.yml
 name: Security Scan
@@ -244,7 +273,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         with:
@@ -252,12 +281,12 @@ jobs:
             p/security-audit
             p/secrets
             p/owasp-top-ten
-            
+
       - name: Run CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: javascript, typescript
-          
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
@@ -265,10 +294,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run npm audit
         run: npm audit --audit-level=high
-        
+
       - name: Run Snyk
         uses: snyk/actions/node@master
         env:
@@ -276,6 +305,7 @@ jobs:
 ```
 
 #### Container Security Scanning
+
 ```dockerfile
 # Use specific, minimal base image
 FROM node:18-alpine3.17
@@ -309,23 +339,24 @@ CMD ["node", "dist/app.js"]
 ### Security Controls Implementation
 
 #### Input Validation & Sanitization
+
 ```typescript
 // src/middleware/validation.ts
-import Joi from 'joi';
-import DOMPurify from 'isomorphic-dompurify';
-import { rateLimit } from 'express-rate-limit';
+import Joi from "joi";
+import DOMPurify from "isomorphic-dompurify";
+import { rateLimit } from "express-rate-limit";
 
 export const validateInput = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,
-      stripUnknown: true
+      stripUnknown: true,
     });
 
     if (error) {
       return res.status(400).json({
-        error: 'Validation failed',
-        details: error.details.map(d => d.message)
+        error: "Validation failed",
+        details: error.details.map((d) => d.message),
       });
     }
 
@@ -334,7 +365,11 @@ export const validateInput = (schema: Joi.ObjectSchema) => {
   };
 };
 
-export const sanitizeHtml = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeHtml = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   if (req.body) {
     req.body = sanitizeObject(req.body);
   }
@@ -342,22 +377,22 @@ export const sanitizeHtml = (req: Request, res: Response, next: NextFunction) =>
 };
 
 function sanitizeObject(obj: any): any {
-  if (typeof obj === 'string') {
+  if (typeof obj === "string") {
     return DOMPurify.sanitize(obj);
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(sanitizeObject);
   }
-  
-  if (obj && typeof obj === 'object') {
+
+  if (obj && typeof obj === "object") {
     const sanitized: any = {};
     for (const [key, value] of Object.entries(obj)) {
       sanitized[key] = sanitizeObject(value);
     }
     return sanitized;
   }
-  
+
   return obj;
 }
 
@@ -365,19 +400,20 @@ function sanitizeObject(obj: any): any {
 export const apiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP',
+  message: "Too many requests from this IP",
   standardHeaders: true,
   legacyHeaders: false,
 });
 ```
 
 #### Authentication & Authorization
+
 ```typescript
 // src/middleware/auth.ts
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { randomBytes, scrypt } from "crypto";
+import { promisify } from "util";
 
 const scryptAsync = promisify(scrypt);
 
@@ -395,16 +431,16 @@ export class SecurityService {
   }
 
   generateSecureToken(): string {
-    return randomBytes(32).toString('hex');
+    return randomBytes(32).toString("hex");
   }
 
   async generateApiKey(userId: string): Promise<string> {
     const salt = randomBytes(16);
-    const key = await scryptAsync(userId, salt, 32) as Buffer;
-    return `${salt.toString('hex')}.${key.toString('hex')}`;
+    const key = (await scryptAsync(userId, salt, 32)) as Buffer;
+    return `${salt.toString("hex")}.${key.toString("hex")}`;
   }
 
-  generateJWT(payload: object, expiresIn = '1h'): string {
+  generateJWT(payload: object, expiresIn = "1h"): string {
     return jwt.sign(payload, this.jwtSecret, { expiresIn });
   }
 
@@ -414,12 +450,16 @@ export class SecurityService {
 }
 
 // Middleware for JWT authentication
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateJWT = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
+    return res.status(401).json({ error: "Access token required" });
   }
 
   try {
@@ -427,16 +467,17 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     req.user = user;
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    return res.status(403).json({ error: "Invalid or expired token" });
   }
 };
 ```
 
 #### Secure Headers Configuration
+
 ```typescript
 // src/middleware/security.ts
-import helmet from 'helmet';
-import { Request, Response, NextFunction } from 'express';
+import helmet from "helmet";
+import { Request, Response, NextFunction } from "express";
 
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
@@ -455,22 +496,28 @@ export const securityHeaders = helmet({
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
-    preload: true
-  }
+    preload: true,
+  },
 });
 
-export const securityLogger = (req: Request, res: Response, next: NextFunction) => {
+export const securityLogger = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   // Log security events
-  if (req.path.includes('admin') || req.path.includes('auth')) {
-    console.log(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      type: 'SECURITY_EVENT',
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      path: req.path,
-      method: req.method,
-      correlationId: req.headers['correlation-id']
-    }));
+  if (req.path.includes("admin") || req.path.includes("auth")) {
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        type: "SECURITY_EVENT",
+        ip: req.ip,
+        userAgent: req.get("User-Agent"),
+        path: req.path,
+        method: req.method,
+        correlationId: req.headers["correlation-id"],
+      }),
+    );
   }
   next();
 };
@@ -479,6 +526,7 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
 ### Security Hardening Checklist
 
 #### Application Security
+
 - [ ] **Input Validation**: Validate all user inputs with Joi/Yup schemas
 - [ ] **Output Encoding**: Encode all outputs to prevent XSS
 - [ ] **SQL Injection Prevention**: Use parameterized queries/ORM
@@ -487,7 +535,8 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
 - [ ] **Authorization**: Role-based access control (RBAC)
 - [ ] **Session Management**: Secure session handling and timeout
 
-#### Infrastructure Security  
+#### Infrastructure Security
+
 - [ ] **HTTPS Everywhere**: Enforce HTTPS with HSTS headers
 - [ ] **Security Headers**: Implement comprehensive security headers
 - [ ] **Secrets Management**: Use secure secret management (Vault, AWS Secrets)
@@ -497,6 +546,7 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
 - [ ] **Backup Security**: Encrypt backups and test restore procedures
 
 #### Data Protection
+
 - [ ] **Data Encryption**: Encrypt sensitive data at rest and in transit
 - [ ] **PII Handling**: Implement data minimization and retention policies
 - [ ] **Database Security**: Secure database access and audit logs
@@ -506,6 +556,7 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
 ## Optimization Scripts
 
 ### Package.json Scripts
+
 ```json
 {
   "scripts": {
@@ -524,9 +575,10 @@ export const securityLogger = (req: Request, res: Response, next: NextFunction) 
 ```
 
 ### Automated Performance Monitoring
+
 ```typescript
 // src/monitoring/performance.ts
-import { performance, PerformanceObserver } from 'perf_hooks';
+import { performance, PerformanceObserver } from "perf_hooks";
 
 export class PerformanceMonitor {
   private metrics: Map<string, number[]> = new Map();
@@ -538,13 +590,13 @@ export class PerformanceMonitor {
   private setupObservers() {
     const obs = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        if (entry.entryType === 'measure') {
+        if (entry.entryType === "measure") {
           this.recordMetric(entry.name, entry.duration);
         }
       }
     });
-    
-    obs.observe({ entryTypes: ['measure'] });
+
+    obs.observe({ entryTypes: ["measure"] });
   }
 
   startTimer(name: string): string {
@@ -568,17 +620,17 @@ export class PerformanceMonitor {
 
   getMetricsSummary(): Record<string, MetricSummary> {
     const summary: Record<string, MetricSummary> = {};
-    
+
     for (const [name, values] of this.metrics) {
       summary[name] = {
         count: values.length,
         avg: values.reduce((a, b) => a + b, 0) / values.length,
         min: Math.min(...values),
         max: Math.max(...values),
-        p95: this.percentile(values, 0.95)
+        p95: this.percentile(values, 0.95),
       };
     }
-    
+
     return summary;
   }
 
@@ -601,6 +653,7 @@ interface MetricSummary {
 ## Success Criteria for Stage 8
 
 ### Performance Targets
+
 - **Response Time**: P95 < 500ms for all API endpoints
 - **Throughput**: Handle >100 RPS under normal load
 - **Memory Usage**: <512MB heap size under normal operation
@@ -608,6 +661,7 @@ interface MetricSummary {
 - **Database**: <100ms P95 query response time
 
 ### Security Requirements
+
 - **Zero Critical Vulnerabilities**: No critical security issues in dependencies
 - **Security Headers**: All security headers properly configured
 - **Authentication**: Strong authentication with session management
@@ -615,6 +669,7 @@ interface MetricSummary {
 - **Audit Trail**: All security events properly logged
 
 ### Monitoring & Alerting
+
 - **Uptime**: 99.9% availability target
 - **Error Rate**: <1% 5xx error rate
 - **Response Time Alerts**: Alert if P95 > 1s for 5 minutes

@@ -1,12 +1,15 @@
 # Code Generation Stage Prompt
 
 ## ROLE
+
 Senior software engineer implementing production-grade code that passes all unit tests from Stage 4 while adhering to frozen interfaces from Stage 3.
 
 ## OBJECTIVE
+
 Generate complete, production-ready implementation code that satisfies all unit tests, follows TDD principles, and implements the exact interface contracts. Create clean, maintainable code with comprehensive error handling, logging, and observability.
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
+
 - **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
 - **Code Quality:** ESLint + Prettier, TypeScript strict mode, no `any` types
 - **Testing:** All unit tests must pass, ≥90% coverage
@@ -14,7 +17,9 @@ Generate complete, production-ready implementation code that satisfies all unit 
 - **Logging:** Structured JSON logs with correlationId tracking
 
 ## INPUTS
+
 Paste the following from previous stages:
+
 - **Stage 3 Output:** Complete frozen interface definitions
 - **Stage 4 Output:** Complete unit test suites
 - **Architecture Context:** Component design and data flow
@@ -34,6 +39,7 @@ You MUST follow this test-driven cycle until ALL tests pass:
 5. **Repeat:** Continue until no failing tests remain
 
 #### Test Validation Loop
+
 ```bash
 # MANDATORY: Run this cycle continuously
 npm test                    # Run all tests
@@ -53,14 +59,16 @@ npm run lint               # Code quality check
 Before generating code, establish:
 
 #### Implementation Order
+
 1. **Core Models & Types** - Database models and TypeScript interfaces
 2. **Repository Layer** - Data access implementation
-3. **Service Layer** - Business logic implementation  
+3. **Service Layer** - Business logic implementation
 4. **Controller Layer** - HTTP request handlers
 5. **Middleware & Utilities** - Cross-cutting concerns
 6. **Configuration & Bootstrap** - Application startup
 
 #### Code Organization
+
 ```
 src/
 ├── models/              # Database models (Sequelize)
@@ -83,15 +91,19 @@ Generate Sequelize models that match the frozen database schema and make the tes
 
 ```typescript
 // src/models/resource.ts
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import { ResourceAttributes, ResourceCreationAttributes } from '../types/resource';
+import { DataTypes, Model, Sequelize } from "sequelize";
+import {
+  ResourceAttributes,
+  ResourceCreationAttributes,
+} from "../types/resource";
 
-export class Resource extends Model<ResourceAttributes, ResourceCreationAttributes> 
-  implements ResourceAttributes {
-  
+export class Resource
+  extends Model<ResourceAttributes, ResourceCreationAttributes>
+  implements ResourceAttributes
+{
   public id!: number;
   public name!: string;
-  public type!: 'basic' | 'premium' | 'enterprise';
+  public type!: "basic" | "premium" | "enterprise";
   public metadata!: Record<string, unknown> | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -108,83 +120,83 @@ export class Resource extends Model<ResourceAttributes, ResourceCreationAttribut
           type: DataTypes.BIGINT,
           primaryKey: true,
           autoIncrement: true,
-          comment: 'Primary identifier'
+          comment: "Primary identifier",
         },
         name: {
           type: DataTypes.STRING(255),
           allowNull: false,
-          comment: 'Resource display name',
+          comment: "Resource display name",
           validate: {
             notEmpty: {
-              msg: 'Resource name cannot be empty'
+              msg: "Resource name cannot be empty",
             },
             len: {
               args: [1, 255],
-              msg: 'Resource name must be between 1 and 255 characters'
-            }
-          }
+              msg: "Resource name must be between 1 and 255 characters",
+            },
+          },
         },
         type: {
-          type: DataTypes.ENUM('basic', 'premium', 'enterprise'),
+          type: DataTypes.ENUM("basic", "premium", "enterprise"),
           allowNull: false,
-          comment: 'Resource tier type',
+          comment: "Resource tier type",
           validate: {
             isIn: {
-              args: [['basic', 'premium', 'enterprise']],
-              msg: 'Resource type must be one of: basic, premium, enterprise'
-            }
-          }
+              args: [["basic", "premium", "enterprise"]],
+              msg: "Resource type must be one of: basic, premium, enterprise",
+            },
+          },
         },
         metadata: {
           type: DataTypes.JSON,
           allowNull: true,
-          comment: 'Flexible metadata storage'
+          comment: "Flexible metadata storage",
         },
         createdAt: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
-          comment: 'Creation timestamp'
+          comment: "Creation timestamp",
         },
         updatedAt: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
-          comment: 'Last update timestamp'
+          comment: "Last update timestamp",
         },
         deletedAt: {
           type: DataTypes.DATE,
           allowNull: true,
-          comment: 'Soft delete timestamp'
-        }
+          comment: "Soft delete timestamp",
+        },
       },
       {
         sequelize,
-        tableName: 'resource',
+        tableName: "resource",
         timestamps: true,
         paranoid: true,
         underscored: true,
         indexes: [
           {
-            name: 'idx_resource_type',
-            fields: ['type'],
-            comment: 'Query by resource type'
+            name: "idx_resource_type",
+            fields: ["type"],
+            comment: "Query by resource type",
           },
           {
-            name: 'idx_resource_name',
-            fields: ['name'],
-            comment: 'Search by resource name'
+            name: "idx_resource_name",
+            fields: ["name"],
+            comment: "Search by resource name",
           },
           {
-            name: 'idx_resource_created_at',
-            fields: ['created_at'],
-            comment: 'Query by creation date'
+            name: "idx_resource_created_at",
+            fields: ["created_at"],
+            comment: "Query by creation date",
           },
           {
-            name: 'idx_resource_type_created',
-            fields: ['type', 'created_at'],
-            comment: 'Type-based pagination'
-          }
-        ]
-      }
+            name: "idx_resource_type_created",
+            fields: ["type", "created_at"],
+            comment: "Type-based pagination",
+          },
+        ],
+      },
     );
 
     return Resource;
@@ -197,7 +209,7 @@ export class Resource extends Model<ResourceAttributes, ResourceCreationAttribut
   public toApiResponse(): {
     id: number;
     name: string;
-    type: 'basic' | 'premium' | 'enterprise';
+    type: "basic" | "premium" | "enterprise";
     createdAt: string;
     updatedAt: string;
   } {
@@ -206,7 +218,7 @@ export class Resource extends Model<ResourceAttributes, ResourceCreationAttribut
       name: this.name,
       type: this.type,
       createdAt: this.createdAt.toISOString(),
-      updatedAt: this.updatedAt.toISOString()
+      updatedAt: this.updatedAt.toISOString(),
     };
   }
 }
@@ -220,10 +232,14 @@ Implement data access layer following repository pattern to make repository test
 
 ```typescript
 // src/repositories/resource-repository.ts
-import { Op, WhereOptions } from 'sequelize';
-import { Resource } from '../models/resource';
-import { ResourceModel, ResourceCreationAttributes, ResourceListOptions } from '../types/resource';
-import { logger } from '../utils/logger';
+import { Op, WhereOptions } from "sequelize";
+import { Resource } from "../models/resource";
+import {
+  ResourceModel,
+  ResourceCreationAttributes,
+  ResourceListOptions,
+} from "../types/resource";
+import { logger } from "../utils/logger";
 
 export class ResourceRepository {
   /**
@@ -234,32 +250,32 @@ export class ResourceRepository {
    */
   public async create(
     attributes: ResourceCreationAttributes,
-    correlationId: string
+    correlationId: string,
   ): Promise<ResourceModel> {
-    logger.info('Creating resource', {
+    logger.info("Creating resource", {
       correlationId,
       resourceName: attributes.name,
       resourceType: attributes.type,
-      service: 'resource-repository'
+      service: "resource-repository",
     });
 
     try {
       const resource = await Resource.create(attributes);
-      
-      logger.info('Resource created successfully', {
+
+      logger.info("Resource created successfully", {
         correlationId,
         resourceId: resource.id,
         resourceName: resource.name,
-        service: 'resource-repository'
+        service: "resource-repository",
       });
 
       return this.toModel(resource);
     } catch (error) {
-      logger.error('Failed to create resource', {
+      logger.error("Failed to create resource", {
         correlationId,
         resourceName: attributes.name,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-repository'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-repository",
       });
       throw error;
     }
@@ -271,39 +287,42 @@ export class ResourceRepository {
    * @param correlationId - Request correlation ID for logging
    * @returns Promise resolving to resource model or null if not found
    */
-  public async findByPk(id: number, correlationId: string): Promise<ResourceModel | null> {
-    logger.debug('Finding resource by ID', {
+  public async findByPk(
+    id: number,
+    correlationId: string,
+  ): Promise<ResourceModel | null> {
+    logger.debug("Finding resource by ID", {
       correlationId,
       resourceId: id,
-      service: 'resource-repository'
+      service: "resource-repository",
     });
 
     try {
       const resource = await Resource.findByPk(id);
-      
+
       if (!resource) {
-        logger.debug('Resource not found', {
+        logger.debug("Resource not found", {
           correlationId,
           resourceId: id,
-          service: 'resource-repository'
+          service: "resource-repository",
         });
         return null;
       }
 
-      logger.debug('Resource found', {
+      logger.debug("Resource found", {
         correlationId,
         resourceId: id,
         resourceName: resource.name,
-        service: 'resource-repository'
+        service: "resource-repository",
       });
 
       return this.toModel(resource);
     } catch (error) {
-      logger.error('Failed to find resource by ID', {
+      logger.error("Failed to find resource by ID", {
         correlationId,
         resourceId: id,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-repository'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-repository",
       });
       throw error;
     }
@@ -319,44 +338,44 @@ export class ResourceRepository {
   public async update(
     id: number,
     updates: Partial<ResourceCreationAttributes>,
-    correlationId: string
+    correlationId: string,
   ): Promise<ResourceModel> {
-    logger.info('Updating resource', {
+    logger.info("Updating resource", {
       correlationId,
       resourceId: id,
       updateFields: Object.keys(updates),
-      service: 'resource-repository'
+      service: "resource-repository",
     });
 
     try {
       const [updatedCount, updatedResources] = await Resource.update(updates, {
         where: { id },
-        returning: true
+        returning: true,
       });
 
       if (updatedCount === 0 || !updatedResources[0]) {
         const error = new Error(`Resource with ID ${id} not found for update`);
-        logger.warn('Resource not found for update', {
+        logger.warn("Resource not found for update", {
           correlationId,
           resourceId: id,
-          service: 'resource-repository'
+          service: "resource-repository",
         });
         throw error;
       }
 
-      logger.info('Resource updated successfully', {
+      logger.info("Resource updated successfully", {
         correlationId,
         resourceId: id,
-        service: 'resource-repository'
+        service: "resource-repository",
       });
 
       return this.toModel(updatedResources[0]);
     } catch (error) {
-      logger.error('Failed to update resource', {
+      logger.error("Failed to update resource", {
         correlationId,
         resourceId: id,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-repository'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-repository",
       });
       throw error;
     }
@@ -369,38 +388,40 @@ export class ResourceRepository {
    * @returns Promise resolving when deletion is complete
    */
   public async delete(id: number, correlationId: string): Promise<void> {
-    logger.info('Deleting resource', {
+    logger.info("Deleting resource", {
       correlationId,
       resourceId: id,
-      service: 'resource-repository'
+      service: "resource-repository",
     });
 
     try {
       const deletedCount = await Resource.destroy({
-        where: { id }
+        where: { id },
       });
 
       if (deletedCount === 0) {
-        const error = new Error(`Resource with ID ${id} not found for deletion`);
-        logger.warn('Resource not found for deletion', {
+        const error = new Error(
+          `Resource with ID ${id} not found for deletion`,
+        );
+        logger.warn("Resource not found for deletion", {
           correlationId,
           resourceId: id,
-          service: 'resource-repository'
+          service: "resource-repository",
         });
         throw error;
       }
 
-      logger.info('Resource deleted successfully', {
+      logger.info("Resource deleted successfully", {
         correlationId,
         resourceId: id,
-        service: 'resource-repository'
+        service: "resource-repository",
       });
     } catch (error) {
-      logger.error('Failed to delete resource', {
+      logger.error("Failed to delete resource", {
         correlationId,
         resourceId: id,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-repository'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-repository",
       });
       throw error;
     }
@@ -414,18 +435,18 @@ export class ResourceRepository {
    */
   public async findAndCountAll(
     options: ResourceListOptions,
-    correlationId: string
+    correlationId: string,
   ): Promise<{ resources: ResourceModel[]; total: number }> {
     const {
       page = 1,
       limit = 20,
       type,
       nameSearch,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortBy = "createdAt",
+      sortOrder = "desc",
     } = options;
 
-    logger.debug('Finding resources with pagination', {
+    logger.debug("Finding resources with pagination", {
       correlationId,
       page,
       limit,
@@ -433,7 +454,7 @@ export class ResourceRepository {
       nameSearch,
       sortBy,
       sortOrder,
-      service: 'resource-repository'
+      service: "resource-repository",
     });
 
     try {
@@ -445,38 +466,40 @@ export class ResourceRepository {
 
       if (nameSearch) {
         where.name = {
-          [Op.like]: `%${nameSearch}%`
+          [Op.like]: `%${nameSearch}%`,
         };
       }
 
       const offset = (page - 1) * limit;
-      const order: Array<[string, string]> = [[sortBy, sortOrder.toUpperCase()]];
+      const order: Array<[string, string]> = [
+        [sortBy, sortOrder.toUpperCase()],
+      ];
 
       const { rows: resources, count: total } = await Resource.findAndCountAll({
         where,
         limit,
         offset,
         order,
-        distinct: true
+        distinct: true,
       });
 
-      logger.debug('Resources found', {
+      logger.debug("Resources found", {
         correlationId,
         total,
         returnedCount: resources.length,
-        service: 'resource-repository'
+        service: "resource-repository",
       });
 
       return {
-        resources: resources.map(resource => this.toModel(resource)),
-        total
+        resources: resources.map((resource) => this.toModel(resource)),
+        total,
       };
     } catch (error) {
-      logger.error('Failed to find resources', {
+      logger.error("Failed to find resources", {
         correlationId,
         options,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-repository'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-repository",
       });
       throw error;
     }
@@ -495,7 +518,7 @@ export class ResourceRepository {
       metadata: resource.metadata,
       createdAt: resource.createdAt,
       updatedAt: resource.updatedAt,
-      deletedAt: resource.deletedAt
+      deletedAt: resource.deletedAt,
     };
   }
 }
@@ -509,16 +532,16 @@ Implement business logic layer with validation and error handling to make servic
 
 ```typescript
 // src/services/resource-service.ts
-import { ResourceRepository } from '../repositories/resource-repository';
-import { 
-  CreateResourceRequest, 
-  UpdateResourceRequest, 
-  ResourceResponse, 
-  ResourceListOptions, 
-  ResourceListResponse 
-} from '../types/resource';
-import { ValidationError, NotFoundError, BusinessLogicError } from '../errors';
-import { logger } from '../utils/logger';
+import { ResourceRepository } from "../repositories/resource-repository";
+import {
+  CreateResourceRequest,
+  UpdateResourceRequest,
+  ResourceResponse,
+  ResourceListOptions,
+  ResourceListResponse,
+} from "../types/resource";
+import { ValidationError, NotFoundError, BusinessLogicError } from "../errors";
+import { logger } from "../utils/logger";
 
 export class ResourceService {
   constructor(private resourceRepository: ResourceRepository) {}
@@ -531,15 +554,15 @@ export class ResourceService {
    */
   public async createResource<T>(
     request: CreateResourceRequest<T>,
-    correlationId: string
+    correlationId: string,
   ): Promise<ResourceResponse<T>> {
     const startTime = Date.now();
-    
-    logger.info('Creating resource', {
+
+    logger.info("Creating resource", {
       correlationId,
       resourceName: request.resource.name,
       userId: request.by.id,
-      service: 'resource-service'
+      service: "resource-service",
     });
 
     try {
@@ -548,54 +571,57 @@ export class ResourceService {
 
       // Extract resource data from generic request
       const { name, type } = request.resource as any;
-      
+
       // Create resource in database
       const createdResource = await this.resourceRepository.create(
         {
           name,
           type,
-          metadata: request.metadata || {}
+          metadata: request.metadata || {},
         },
-        correlationId
+        correlationId,
       );
 
       const timeTaken = Date.now() - startTime;
 
-      logger.info('Resource created successfully', {
+      logger.info("Resource created successfully", {
         correlationId,
         resourceId: createdResource.id,
         timeTakenMs: timeTaken,
-        service: 'resource-service'
+        service: "resource-service",
       });
 
       return {
         data: request.resource,
         respondedAt: new Date().toISOString(),
         timeTaken,
-        metadata: request.metadata || {}
+        metadata: request.metadata || {},
       };
     } catch (error) {
       const timeTaken = Date.now() - startTime;
-      
-      logger.error('Failed to create resource', {
+
+      logger.error("Failed to create resource", {
         correlationId,
         resourceName: request.resource.name,
         timeTakenMs: timeTaken,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-service'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-service",
       });
 
       // Re-throw known errors, wrap unknown errors
-      if (error instanceof ValidationError || error instanceof BusinessLogicError) {
+      if (
+        error instanceof ValidationError ||
+        error instanceof BusinessLogicError
+      ) {
         throw error;
       }
 
       // Handle database constraint violations
-      if (error instanceof Error && error.message.includes('unique')) {
-        throw new BusinessLogicError('Resource name must be unique');
+      if (error instanceof Error && error.message.includes("unique")) {
+        throw new BusinessLogicError("Resource name must be unique");
       }
 
-      throw new BusinessLogicError('Failed to create resource');
+      throw new BusinessLogicError("Failed to create resource");
     }
   }
 
@@ -607,40 +633,43 @@ export class ResourceService {
    */
   public async getResourceById<T>(
     id: number,
-    correlationId: string
+    correlationId: string,
   ): Promise<ResourceResponse<T> | null> {
     const startTime = Date.now();
-    
-    logger.debug('Retrieving resource by ID', {
+
+    logger.debug("Retrieving resource by ID", {
       correlationId,
       resourceId: id,
-      service: 'resource-service'
+      service: "resource-service",
     });
 
     try {
       // Validate ID
       if (!Number.isInteger(id) || id <= 0) {
-        throw new ValidationError('Resource ID must be a positive integer');
+        throw new ValidationError("Resource ID must be a positive integer");
       }
 
-      const resource = await this.resourceRepository.findByPk(id, correlationId);
+      const resource = await this.resourceRepository.findByPk(
+        id,
+        correlationId,
+      );
       const timeTaken = Date.now() - startTime;
 
       if (!resource) {
-        logger.debug('Resource not found', {
+        logger.debug("Resource not found", {
           correlationId,
           resourceId: id,
           timeTakenMs: timeTaken,
-          service: 'resource-service'
+          service: "resource-service",
         });
         return null;
       }
 
-      logger.debug('Resource retrieved successfully', {
+      logger.debug("Resource retrieved successfully", {
         correlationId,
         resourceId: id,
         timeTakenMs: timeTaken,
-        service: 'resource-service'
+        service: "resource-service",
       });
 
       return {
@@ -648,28 +677,28 @@ export class ResourceService {
           id: resource.id,
           name: resource.name,
           type: resource.type,
-          createdAt: resource.createdAt.toISOString()
+          createdAt: resource.createdAt.toISOString(),
         } as T,
         respondedAt: new Date().toISOString(),
         timeTaken,
-        metadata: resource.metadata || {}
+        metadata: resource.metadata || {},
       };
     } catch (error) {
       const timeTaken = Date.now() - startTime;
-      
-      logger.error('Failed to retrieve resource', {
+
+      logger.error("Failed to retrieve resource", {
         correlationId,
         resourceId: id,
         timeTakenMs: timeTaken,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-service'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-service",
       });
 
       if (error instanceof ValidationError) {
         throw error;
       }
 
-      throw new BusinessLogicError('Failed to retrieve resource');
+      throw new BusinessLogicError("Failed to retrieve resource");
     }
   }
 
@@ -681,67 +710,65 @@ export class ResourceService {
    */
   public async listResources(
     options: ResourceListOptions,
-    correlationId: string
+    correlationId: string,
   ): Promise<ResourceListResponse> {
     const startTime = Date.now();
-    
-    logger.debug('Listing resources', {
+
+    logger.debug("Listing resources", {
       correlationId,
       options,
-      service: 'resource-service'
+      service: "resource-service",
     });
 
     try {
       // Validate options
       this.validateListOptions(options);
 
-      const { resources, total } = await this.resourceRepository.findAndCountAll(
-        options,
-        correlationId
-      );
+      const { resources, total } =
+        await this.resourceRepository.findAndCountAll(options, correlationId);
 
       const timeTaken = Date.now() - startTime;
       const { page = 1, limit = 20 } = options;
 
-      logger.debug('Resources listed successfully', {
+      logger.debug("Resources listed successfully", {
         correlationId,
         total,
         returnedCount: resources.length,
         timeTakenMs: timeTaken,
-        service: 'resource-service'
+        service: "resource-service",
       });
 
       return {
-        resources: resources.map(resource => ({
+        resources: resources.map((resource) => ({
           id: resource.id,
           name: resource.name,
           type: resource.type,
           createdAt: resource.createdAt.toISOString(),
-          updatedAt: resource.updatedAt.toISOString()
+          updatedAt: resource.updatedAt.toISOString(),
         })),
         pagination: {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total / limit)
-        }
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       const timeTaken = Date.now() - startTime;
-      
-      logger.error('Failed to list resources', {
+
+      logger.error("Failed to list resources", {
         correlationId,
         options,
         timeTakenMs: timeTaken,
-        err: error instanceof Error ? error.message : 'Unknown error',
-        service: 'resource-service'
+        err: error instanceof Error ? error.message : "Unknown error",
+        service: "resource-service",
       });
 
       if (error instanceof ValidationError) {
         throw error;
       }
 
-      throw new BusinessLogicError('Failed to list resources');
+      throw new BusinessLogicError("Failed to list resources");
     }
   }
 
@@ -751,29 +778,33 @@ export class ResourceService {
    */
   private validateCreateRequest<T>(request: CreateResourceRequest<T>): void {
     if (!request.resource) {
-      throw new ValidationError('Resource data is required');
+      throw new ValidationError("Resource data is required");
     }
 
     if (!request.by) {
-      throw new ValidationError('User information is required');
+      throw new ValidationError("User information is required");
     }
 
     const { name, type } = request.resource as any;
 
-    if (!name || typeof name !== 'string') {
-      throw new ValidationError('Resource name is required and must be a string');
+    if (!name || typeof name !== "string") {
+      throw new ValidationError(
+        "Resource name is required and must be a string",
+      );
     }
 
     if (name.trim().length === 0) {
-      throw new ValidationError('Resource name cannot be empty');
+      throw new ValidationError("Resource name cannot be empty");
     }
 
     if (name.length > 255) {
-      throw new ValidationError('Resource name cannot exceed 255 characters');
+      throw new ValidationError("Resource name cannot exceed 255 characters");
     }
 
-    if (!type || !['basic', 'premium', 'enterprise'].includes(type)) {
-      throw new ValidationError('Resource type must be one of: basic, premium, enterprise');
+    if (!type || !["basic", "premium", "enterprise"].includes(type)) {
+      throw new ValidationError(
+        "Resource type must be one of: basic, premium, enterprise",
+      );
     }
   }
 
@@ -782,24 +813,45 @@ export class ResourceService {
    * @param options - List options to validate
    */
   private validateListOptions(options: ResourceListOptions): void {
-    if (options.page !== undefined && (!Number.isInteger(options.page) || options.page < 1)) {
-      throw new ValidationError('Page must be a positive integer');
+    if (
+      options.page !== undefined &&
+      (!Number.isInteger(options.page) || options.page < 1)
+    ) {
+      throw new ValidationError("Page must be a positive integer");
     }
 
-    if (options.limit !== undefined && (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 100)) {
-      throw new ValidationError('Limit must be between 1 and 100');
+    if (
+      options.limit !== undefined &&
+      (!Number.isInteger(options.limit) ||
+        options.limit < 1 ||
+        options.limit > 100)
+    ) {
+      throw new ValidationError("Limit must be between 1 and 100");
     }
 
-    if (options.type !== undefined && !['basic', 'premium', 'enterprise'].includes(options.type)) {
-      throw new ValidationError('Type must be one of: basic, premium, enterprise');
+    if (
+      options.type !== undefined &&
+      !["basic", "premium", "enterprise"].includes(options.type)
+    ) {
+      throw new ValidationError(
+        "Type must be one of: basic, premium, enterprise",
+      );
     }
 
-    if (options.sortBy !== undefined && !['name', 'createdAt', 'updatedAt'].includes(options.sortBy)) {
-      throw new ValidationError('SortBy must be one of: name, createdAt, updatedAt');
+    if (
+      options.sortBy !== undefined &&
+      !["name", "createdAt", "updatedAt"].includes(options.sortBy)
+    ) {
+      throw new ValidationError(
+        "SortBy must be one of: name, createdAt, updatedAt",
+      );
     }
 
-    if (options.sortOrder !== undefined && !['asc', 'desc'].includes(options.sortOrder)) {
-      throw new ValidationError('SortOrder must be either asc or desc');
+    if (
+      options.sortOrder !== undefined &&
+      !["asc", "desc"].includes(options.sortOrder)
+    ) {
+      throw new ValidationError("SortOrder must be either asc or desc");
     }
   }
 }
@@ -813,11 +865,16 @@ Implement HTTP request handlers with proper error handling and response formatti
 
 ```typescript
 // src/controllers/resource-controller.ts
-import { Request, Response, NextFunction } from 'express';
-import { ResourceService } from '../services/resource-service';
-import { CreateResourceRequest, UpdateResourceRequest, ApiResponse, ApiError } from '../types/resource';
-import { ValidationError, NotFoundError, BusinessLogicError } from '../errors';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { ResourceService } from "../services/resource-service";
+import {
+  CreateResourceRequest,
+  UpdateResourceRequest,
+  ApiResponse,
+  ApiError,
+} from "../types/resource";
+import { ValidationError, NotFoundError, BusinessLogicError } from "../errors";
+import { logger } from "../utils/logger";
 
 export class ResourceController {
   constructor(private resourceService: ResourceService) {}
@@ -826,35 +883,42 @@ export class ResourceController {
    * Create a new resource
    * POST /v1/resources
    */
-  public createResource = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const correlationId = req.headers['x-correlation-id'] as string || req.id;
+  public createResource = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const correlationId = (req.headers["x-correlation-id"] as string) || req.id;
     const startTime = Date.now();
 
-    logger.info('Processing create resource request', {
+    logger.info("Processing create resource request", {
       correlationId,
       method: req.method,
       url: req.url,
-      service: 'resource-controller'
+      service: "resource-controller",
     });
 
     try {
       const request: CreateResourceRequest<any> = req.body;
-      
-      const result = await this.resourceService.createResource(request, correlationId);
+
+      const result = await this.resourceService.createResource(
+        request,
+        correlationId,
+      );
       const timeTakenMs = Date.now() - startTime;
 
       const response: ApiResponse<any> = {
         transaction_id: correlationId,
-        message: 'Resource created successfully',
+        message: "Resource created successfully",
         time_taken_ms: timeTakenMs,
-        data: result.data
+        data: result.data,
       };
 
-      logger.info('Create resource request processed successfully', {
+      logger.info("Create resource request processed successfully", {
         correlationId,
         resourceId: result.data.id,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       res.status(201).json(response);
@@ -867,46 +931,53 @@ export class ResourceController {
    * Get resource by ID
    * GET /v1/resources/:id
    */
-  public getResource = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const correlationId = req.headers['x-correlation-id'] as string || req.id;
+  public getResource = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const correlationId = (req.headers["x-correlation-id"] as string) || req.id;
     const startTime = Date.now();
     const resourceId = parseInt(req.params.id, 10);
 
-    logger.debug('Processing get resource request', {
+    logger.debug("Processing get resource request", {
       correlationId,
       resourceId,
       method: req.method,
       url: req.url,
-      service: 'resource-controller'
+      service: "resource-controller",
     });
 
     try {
       if (isNaN(resourceId) || resourceId <= 0) {
-        throw new ValidationError('Resource ID must be a positive integer');
+        throw new ValidationError("Resource ID must be a positive integer");
       }
 
-      const result = await this.resourceService.getResourceById(resourceId, correlationId);
+      const result = await this.resourceService.getResourceById(
+        resourceId,
+        correlationId,
+      );
       const timeTakenMs = Date.now() - startTime;
 
       if (!result) {
         const response: ApiResponse<null> = {
           transaction_id: correlationId,
-          message: 'Resource not found',
+          message: "Resource not found",
           time_taken_ms: timeTakenMs,
           error: {
-            title: 'Not Found',
+            title: "Not Found",
             status: 404,
             detail: `Resource with ID ${resourceId} not found`,
             transaction_id: correlationId,
-            time_taken_ms: timeTakenMs
-          }
+            time_taken_ms: timeTakenMs,
+          },
         };
 
-        logger.info('Resource not found', {
+        logger.info("Resource not found", {
           correlationId,
           resourceId,
           timeTakenMs,
-          service: 'resource-controller'
+          service: "resource-controller",
         });
 
         res.status(404).json(response);
@@ -915,16 +986,16 @@ export class ResourceController {
 
       const response: ApiResponse<any> = {
         transaction_id: correlationId,
-        message: 'OK',
+        message: "OK",
         time_taken_ms: timeTakenMs,
-        data: result.data
+        data: result.data,
       };
 
-      logger.debug('Get resource request processed successfully', {
+      logger.debug("Get resource request processed successfully", {
         correlationId,
         resourceId,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       res.status(200).json(response);
@@ -937,45 +1008,60 @@ export class ResourceController {
    * List resources with pagination
    * GET /v1/resources
    */
-  public listResources = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const correlationId = req.headers['x-correlation-id'] as string || req.id;
+  public listResources = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const correlationId = (req.headers["x-correlation-id"] as string) || req.id;
     const startTime = Date.now();
 
-    logger.debug('Processing list resources request', {
+    logger.debug("Processing list resources request", {
       correlationId,
       query: req.query,
       method: req.method,
       url: req.url,
-      service: 'resource-controller'
+      service: "resource-controller",
     });
 
     try {
       const options = {
-        page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
-        type: req.query.type as 'basic' | 'premium' | 'enterprise' | undefined,
+        page: req.query.page
+          ? parseInt(req.query.page as string, 10)
+          : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string, 10)
+          : undefined,
+        type: req.query.type as "basic" | "premium" | "enterprise" | undefined,
         nameSearch: req.query.nameSearch as string | undefined,
-        sortBy: req.query.sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
-        sortOrder: req.query.sortOrder as 'asc' | 'desc' | undefined
+        sortBy: req.query.sortBy as
+          | "name"
+          | "createdAt"
+          | "updatedAt"
+          | undefined,
+        sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
       };
 
-      const result = await this.resourceService.listResources(options, correlationId);
+      const result = await this.resourceService.listResources(
+        options,
+        correlationId,
+      );
       const timeTakenMs = Date.now() - startTime;
 
       const response: ApiResponse<any[]> = {
         transaction_id: correlationId,
-        message: 'OK',
+        message: "OK",
         time_taken_ms: timeTakenMs,
         data: result.resources,
-        meta: result.pagination
+        meta: result.pagination,
       };
 
-      logger.debug('List resources request processed successfully', {
+      logger.debug("List resources request processed successfully", {
         correlationId,
         total: result.pagination.total,
         returnedCount: result.resources.length,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       res.status(200).json(response);
@@ -991,78 +1077,84 @@ export class ResourceController {
    * @param startTime - Request start time
    * @returns Formatted error for Express error handler
    */
-  private handleError(error: unknown, correlationId: string, startTime: number): ApiError {
+  private handleError(
+    error: unknown,
+    correlationId: string,
+    startTime: number,
+  ): ApiError {
     const timeTakenMs = Date.now() - startTime;
 
     if (error instanceof ValidationError) {
-      logger.warn('Validation error in resource controller', {
+      logger.warn("Validation error in resource controller", {
         correlationId,
         err: error.message,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       return {
-        title: 'Bad Request',
+        title: "Bad Request",
         status: 400,
-        detail: 'Request validation failed',
+        detail: "Request validation failed",
         transaction_id: correlationId,
         time_taken_ms: timeTakenMs,
-        details: [{
-          message: error.message,
-          details: [{ field: 'request', issue: error.message }]
-        }]
+        details: [
+          {
+            message: error.message,
+            details: [{ field: "request", issue: error.message }],
+          },
+        ],
       };
     }
 
     if (error instanceof NotFoundError) {
-      logger.info('Resource not found in controller', {
+      logger.info("Resource not found in controller", {
         correlationId,
         err: error.message,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       return {
-        title: 'Not Found',
+        title: "Not Found",
         status: 404,
         detail: error.message,
         transaction_id: correlationId,
-        time_taken_ms: timeTakenMs
+        time_taken_ms: timeTakenMs,
       };
     }
 
     if (error instanceof BusinessLogicError) {
-      logger.error('Business logic error in resource controller', {
+      logger.error("Business logic error in resource controller", {
         correlationId,
         err: error.message,
         timeTakenMs,
-        service: 'resource-controller'
+        service: "resource-controller",
       });
 
       return {
-        title: 'Business Logic Error',
+        title: "Business Logic Error",
         status: 422,
         detail: error.message,
         transaction_id: correlationId,
-        time_taken_ms: timeTakenMs
+        time_taken_ms: timeTakenMs,
       };
     }
 
     // Unknown error
-    logger.error('Unknown error in resource controller', {
+    logger.error("Unknown error in resource controller", {
       correlationId,
-      err: error instanceof Error ? error.message : 'Unknown error',
+      err: error instanceof Error ? error.message : "Unknown error",
       timeTakenMs,
-      service: 'resource-controller'
+      service: "resource-controller",
     });
 
     return {
-      title: 'Internal Server Error',
+      title: "Internal Server Error",
       status: 500,
-      detail: 'An unexpected error occurred',
+      detail: "An unexpected error occurred",
       transaction_id: correlationId,
-      time_taken_ms: timeTakenMs
+      time_taken_ms: timeTakenMs,
     };
   }
 }
@@ -1128,57 +1220,62 @@ export class SystemError extends AppError {
 }
 
 // src/middleware/error-handler.ts
-import { Request, Response, NextFunction } from 'express';
-import { ApiError } from '../types/resource';
-import { AppError } from '../errors';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { ApiError } from "../types/resource";
+import { AppError } from "../errors";
+import { logger } from "../utils/logger";
 
 /**
  * Global error handling middleware
  * @param error - Error to handle
  * @param req - Express request
- * @param res - Express response  
+ * @param res - Express response
  * @param next - Express next function
  */
 export function errorHandler(
   error: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
-  const correlationId = req.headers['x-correlation-id'] as string || req.id;
+  const correlationId = (req.headers["x-correlation-id"] as string) || req.id;
 
   // If error is already an ApiError (from controller), send it directly
-  if (error && typeof error === 'object' && 'status' in error && 'title' in error) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "status" in error &&
+    "title" in error
+  ) {
     const apiError = error as ApiError;
     res.status(apiError.status).json({
       transaction_id: correlationId,
       message: apiError.title,
-      error: apiError
+      error: apiError,
     });
     return;
   }
 
   // Handle unknown errors
   const apiError: ApiError = {
-    title: 'Internal Server Error',
+    title: "Internal Server Error",
     status: 500,
-    detail: 'An unexpected error occurred',
+    detail: "An unexpected error occurred",
     transaction_id: correlationId,
-    time_taken_ms: Date.now() - (req.startTime || Date.now())
+    time_taken_ms: Date.now() - (req.startTime || Date.now()),
   };
 
-  logger.error('Unhandled error in error middleware', {
+  logger.error("Unhandled error in error middleware", {
     correlationId,
-    err: error instanceof Error ? error.message : 'Unknown error',
+    err: error instanceof Error ? error.message : "Unknown error",
     stack: error instanceof Error ? error.stack : undefined,
-    service: 'error-handler'
+    service: "error-handler",
   });
 
   res.status(500).json({
     transaction_id: correlationId,
-    message: 'Internal Server Error',
-    error: apiError
+    message: "Internal Server Error",
+    error: apiError,
   });
 }
 ```
@@ -1188,6 +1285,7 @@ export function errorHandler(
 **CRITICAL:** You must iterate through implementation until ALL validation checks pass.
 
 ### Test Execution Cycle
+
 After each implementation phase, run this validation sequence:
 
 ```bash
@@ -1205,21 +1303,25 @@ npm run lint 2>&1 | tee lint-results.txt
 ```
 
 ### Iteration Requirements
+
 Continue implementing/fixing until you achieve:
 
 #### ✅ Test Results Requirements
+
 - **Zero failing tests:** All tests must pass (0 failed)
 - **Coverage threshold:** ≥90% line coverage
 - **Test types covered:** Unit tests, error scenarios, edge cases
 - **Mock validation:** All mocks properly configured and used
 
-#### ✅ Code Quality Requirements  
+#### ✅ Code Quality Requirements
+
 - **TypeScript:** Zero compilation errors, strict mode enabled
 - **Linting:** Zero ESLint warnings or errors
 - **Formatting:** Prettier formatting applied consistently
 - **No `any` types:** Strict typing throughout codebase
 
 #### ✅ Interface Compliance Requirements
+
 - **Method signatures:** Exact match with Stage 3 frozen interfaces
 - **Return types:** Proper type safety for all return values
 - **Error handling:** Correct error types thrown as specified
@@ -1249,6 +1351,7 @@ When tests fail, follow this systematic approach:
 #### Flag Type: `INTERFACE_DEFINITION_ERROR`
 
 **Trigger Conditions:**
+
 - Interface method signature doesn't make sense for the business logic
 - Missing required interface methods that tests expect
 - Interface types are incompatible with database schema
@@ -1257,6 +1360,7 @@ When tests fail, follow this systematic approach:
 - Missing interfaces for required functionality
 
 **Examples:**
+
 ```typescript
 // ❌ RAISE FLAG: Interface expects string but business logic needs number
 interface BadInterface {
@@ -1276,6 +1380,7 @@ interface ImpossibleInterface {
 ```
 
 **Flag Response:**
+
 ```markdown
 🚩 **INTERFACE_DEFINITION_ERROR**
 
@@ -1293,32 +1398,35 @@ interface ImpossibleInterface {
 #### Flag Type: `TEST_CASE_ERROR`
 
 **Trigger Conditions:**
+
 - Test expects behavior that contradicts frozen interfaces
-- Test mocks are incorrectly configured 
+- Test mocks are incorrectly configured
 - Test assertions don't match interface contracts
 - Test data violates business rules or constraints
 - Tests expect impossible or contradictory outcomes
 - Missing tests for critical interface methods
 
 **Examples:**
+
 ```typescript
 // ❌ RAISE FLAG: Test expects different signature than interface
 // Interface: createUser(data: UserData): Promise<User>
 // Test: expects createUser(id: number, data: UserData): Promise<User>
 
 // ❌ RAISE FLAG: Test violates business rules
-it('should create user with invalid email', async () => {
-  const result = await service.createUser({ email: 'invalid-email' });
+it("should create user with invalid email", async () => {
+  const result = await service.createUser({ email: "invalid-email" });
   expect(result).toBeTruthy(); // Should fail validation, not succeed
 });
 
 // ❌ RAISE FLAG: Mock doesn't match interface
 const mockService = {
-  createUser: jest.fn().mockResolvedValue(undefined) // Interface says Promise<User>
+  createUser: jest.fn().mockResolvedValue(undefined), // Interface says Promise<User>
 };
 ```
 
 **Flag Response:**
+
 ```markdown
 🚩 **TEST_CASE_ERROR**
 
@@ -1337,6 +1445,7 @@ const mockService = {
 #### Flag Type: `ARCHITECTURE_INCONSISTENCY`
 
 **Trigger Conditions:**
+
 - Interface design doesn't support required database operations
 - Service layer interfaces don't align with repository capabilities
 - API contracts don't match internal service interfaces
@@ -1344,6 +1453,7 @@ const mockService = {
 - Performance requirements can't be met with current interface design
 
 **Flag Response:**
+
 ```markdown
 🚩 **ARCHITECTURE_INCONSISTENCY**
 
@@ -1361,6 +1471,7 @@ const mockService = {
 #### Flag Type: `IMPLEMENTATION_IMPOSSIBLE`
 
 **Trigger Conditions:**
+
 - Tests require functionality that violates security constraints
 - Interface contracts require breaking changes to existing systems
 - Performance requirements are unachievable with given constraints
@@ -1368,6 +1479,7 @@ const mockService = {
 - Technology stack limitations prevent interface implementation
 
 **Flag Response:**
+
 ```markdown
 🚩 **IMPLEMENTATION_IMPOSSIBLE**
 
@@ -1391,12 +1503,12 @@ When you raise any flag:
 
 ### Flag Decision Matrix
 
-| Flag Type | Return To Stage | Typical Resolution Time | Impact Level |
-|-----------|----------------|------------------------|--------------|
-| `INTERFACE_DEFINITION_ERROR` | Stage 3 | 1-2 hours | High |
-| `TEST_CASE_ERROR` | Stage 4 | 30 minutes | Medium |
-| `ARCHITECTURE_INCONSISTENCY` | Stage 2 | 2-4 hours | High |
-| `IMPLEMENTATION_IMPOSSIBLE` | Stage 1 | 4-8 hours | Critical |
+| Flag Type                    | Return To Stage | Typical Resolution Time | Impact Level |
+| ---------------------------- | --------------- | ----------------------- | ------------ |
+| `INTERFACE_DEFINITION_ERROR` | Stage 3         | 1-2 hours               | High         |
+| `TEST_CASE_ERROR`            | Stage 4         | 30 minutes              | Medium       |
+| `ARCHITECTURE_INCONSISTENCY` | Stage 2         | 2-4 hours               | High         |
+| `IMPLEMENTATION_IMPOSSIBLE`  | Stage 1         | 4-8 hours               | Critical     |
 
 ### Example Flag in Practice
 
@@ -1418,19 +1530,22 @@ Where `createResourceRequest` is of type `CreateResourceRequest<ResourceData>`
 ```
 
 ### Example Iteration Log
+
 Document your iterations:
 
 ```markdown
 ## Implementation Iteration Log
 
 ### Iteration 1
+
 - **Tests Run:** 45 total, 23 failed
 - **Coverage:** 67%
 - **Key Failures:** ResourceRepository.create(), ResourceService.validateInput()
 - **Action:** Implemented basic repository methods
 - **Result:** 15 tests now passing
 
-### Iteration 2  
+### Iteration 2
+
 - **Tests Run:** 45 total, 8 failed
 - **Coverage:** 84%
 - **Key Failures:** Error handling, validation edge cases
@@ -1438,8 +1553,9 @@ Document your iterations:
 - **Result:** 37 tests now passing
 
 ### Iteration 3
+
 - **Tests Run:** 45 total, 0 failed ✅
-- **Coverage:** 92% ✅  
+- **Coverage:** 92% ✅
 - **TypeScript:** 0 errors ✅
 - **ESLint:** 0 warnings ✅
 - **Status:** IMPLEMENTATION COMPLETE
@@ -1448,6 +1564,7 @@ Document your iterations:
 ## MANDATORY CODE QUALITY CHECKLIST
 
 ### Implementation Standards
+
 - [ ] **ALL UNIT TESTS PASS** - Zero failing tests (NON-NEGOTIABLE)
 - [ ] **COVERAGE ≥90%** - Line coverage meets minimum threshold
 - [ ] TypeScript strict mode with no `any` types
@@ -1456,6 +1573,7 @@ Document your iterations:
 - [ ] Structured logging with correlation ID tracking
 
 ### Security Standards
+
 - [ ] Input validation on all endpoints
 - [ ] Parameterized queries only (no SQL injection)
 - [ ] No secrets or credentials in code
@@ -1463,6 +1581,7 @@ Document your iterations:
 - [ ] Request/response sanitization
 
 ### Performance Standards
+
 - [ ] Database queries optimized with proper indexes
 - [ ] Connection pooling configured
 - [ ] Response time logging and monitoring
@@ -1470,6 +1589,7 @@ Document your iterations:
 - [ ] Proper async/await usage
 
 ### Observability Standards
+
 - [ ] Structured JSON logging throughout
 - [ ] Correlation ID propagation
 - [ ] Error logging with context
@@ -1480,10 +1600,11 @@ Document your iterations:
 
 **ONLY PROVIDE THIS OUTPUT AFTER ALL TESTS PASS**
 
-```markdown
+````markdown
 # ✅ TDD Implementation Complete: [Feature Name]
 
 ## Test-Driven Development Results
+
 **FINAL TEST RUN:** [Date/Time]
 **Total Tests:** [Count] (ALL PASSING ✅)
 **Coverage:** [%]% line coverage (≥90% ✅)
@@ -1491,18 +1612,20 @@ Document your iterations:
 **ESLint:** 0 warnings/errors ✅
 
 ## Implementation Iteration Summary
+
 **Total Iterations:** [Count]
 **Initial Failing Tests:** [Count]
 **Final Passing Tests:** [Count]/[Count] ✅
 **Test Compliance:** 100% ✅
 
 ## Final Test Results
+
 ```bash
 # Last test run output
 npm test
 > [Pass/Fail results showing ALL TESTS PASSING]
 
-npm run test:coverage  
+npm run test:coverage
 > [Coverage report showing ≥90%]
 
 npm run type-check
@@ -1511,26 +1634,32 @@ npm run type-check
 npm run lint
 > [ESLint passed with no issues]
 ```
+````
 
 ## Generated Implementation Files
 
 ### Models Layer
+
 - `src/models/resource.ts` - Sequelize model with validation ✅ Tests Pass
 - `src/models/index.ts` - Model registry and initialization ✅ Tests Pass
 
-### Repository Layer  
+### Repository Layer
+
 - `src/repositories/resource-repository.ts` - Data access implementation ✅ Tests Pass
 - `src/repositories/index.ts` - Repository factory ✅ Tests Pass
 
 ### Service Layer
+
 - `src/services/resource-service.ts` - Business logic implementation ✅ Tests Pass
 - `src/services/index.ts` - Service container ✅ Tests Pass
 
 ### Controller Layer
+
 - `src/controllers/resource-controller.ts` - HTTP request handlers ✅ Tests Pass
 - `src/controllers/index.ts` - Route definitions ✅ Tests Pass
 
 ### Support Files
+
 - `src/errors/index.ts` - Error classes and handling ✅ Tests Pass
 - `src/middleware/error-handler.ts` - Express error middleware ✅ Tests Pass
 - `src/utils/logger.ts` - Structured logging utility ✅ Tests Pass
@@ -1538,6 +1667,7 @@ npm run lint
 - `src/app.ts` - Express application bootstrap ✅ Tests Pass
 
 ## TDD Quality Validation Results
+
 - ✅ **ALL [Count] UNIT TESTS PASS** (NON-NEGOTIABLE MET)
 - ✅ **COVERAGE [%]% ≥90%** (THRESHOLD MET)
 - ✅ TypeScript compilation successful (ZERO ERRORS)
@@ -1548,6 +1678,7 @@ npm run lint
 - ✅ Observability implemented
 
 ## Commands to Verify Implementation
+
 ```bash
 # Verify all tests still pass
 npm test                # Should show ALL PASSING
@@ -1558,16 +1689,19 @@ npm run dev            # Should start successfully
 ```
 
 ## TDD Success Confirmation
+
 - ✅ **RED PHASE:** Started with [Count] failing tests
 - ✅ **GREEN PHASE:** Implemented code to make tests pass
 - ✅ **REFACTOR PHASE:** Improved code while keeping tests green
 - ✅ **FINAL STATE:** ALL tests passing, coverage met, quality validated
 
 ## Next Steps
+
 - ✅ Implementation ready for Stage 6 Integration Tests
 - ✅ All frozen interfaces fully implemented and test-validated
 - ✅ Code follows strict TDD principles with passing unit tests
 - ✅ Ready for integration testing phase
+
 ```
 
 ## SUCCESS CRITERIA (ALL MUST BE MET)
@@ -1576,7 +1710,7 @@ npm run dev            # Should start successfully
 - [ ] **ALL UNIT TESTS PASS** - Zero failing tests from Stage 4 (NON-NEGOTIABLE)
 - [ ] **COVERAGE ≥90%** - Line coverage threshold met
 - [ ] **100% INTERFACE COMPLIANCE** - Stage 3 frozen contracts implemented exactly
-- [ ] **TYPESCRIPT STRICT MODE** - Zero compilation errors, no `any` types  
+- [ ] **TYPESCRIPT STRICT MODE** - Zero compilation errors, no `any` types
 - [ ] **ESLINT CLEAN** - Zero warnings or errors
 
 ### Quality & Standards Criteria
@@ -1597,3 +1731,4 @@ npm run dev            # Should start successfully
 - [ ] **NO MODIFIED INTERFACES** - Frozen interfaces from Stage 3 remain unchanged
 - [ ] **NO MODIFIED TESTS** - Unit tests from Stage 4 remain unchanged (unless properly flagged)
 - [ ] **COMPLETE IMPLEMENTATION** - All interface methods implemented, no stubs or TODOs
+```
