@@ -1,0 +1,44 @@
+#!/bin/sh
+# Pre-commit hook enforcing type safety and code quality
+# See CLAUDE.md for exception process
+
+echo "🔍 Running pre-commit quality gates..."
+
+# Stage 1: Type Safety (ZERO TOLERANCE)
+echo "📋 Checking TypeScript compilation..."
+npm run type-check
+if [ $? -ne 0 ]; then
+  echo "❌ TypeScript compilation failed!"
+  echo "💡 Fix type errors before committing. See CLAUDE.md for exception process."
+  exit 1
+fi
+
+# Stage 2: Lint with strict type safety rules
+echo "🔍 Running ESLint (zero tolerance for any/unknown)..."
+npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint failed!"
+  echo "💡 Fix linting errors or use exception process in CLAUDE.md"
+  exit 1
+fi
+
+# Stage 3: Format check
+echo "✨ Checking code formatting..."
+npm run format:check
+if [ $? -ne 0 ]; then
+  echo "❌ Code formatting issues detected!"
+  echo "💡 Run 'npm run format' to auto-fix"
+  exit 1
+fi
+
+# Stage 4: Unit tests for changed files
+# echo "🧪 Running unit tests..."
+# npm run test:unit
+# if [ $? -ne 0 ]; then
+#   echo "❌ Unit tests failed!"
+#   echo "💡 Fix failing tests before committing"
+#   exit 1
+# fi
+
+echo "✅ All pre-commit checks passed!"
+echo "🚀 Commit approved for type safety and code quality"

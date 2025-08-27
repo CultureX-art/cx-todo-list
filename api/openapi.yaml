@@ -56,7 +56,7 @@ paths:
                   email: newuser@example.com
                   password: SecurePass123
       responses:
-        '201':
+        "201":
           description: User created successfully
           content:
             application/json:
@@ -75,12 +75,12 @@ paths:
                     type: string
                     format: date-time
                     example: 2024-01-15T10:30:00Z
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '409':
-          $ref: '#/components/responses/ConflictError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/auth/login:
     post:
@@ -111,7 +111,7 @@ paths:
                   email: user@example.com
                   password: MyPassword123
       responses:
-        '200':
+        "200":
           description: Login successful
           content:
             application/json:
@@ -136,12 +136,12 @@ paths:
                       email:
                         type: string
                         example: user@example.com
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/auth/me:
     get:
@@ -150,7 +150,7 @@ paths:
       description: Retrieve the authenticated user's profile information
       operationId: getCurrentUser
       responses:
-        '200':
+        "200":
           description: User profile retrieved successfully
           content:
             application/json:
@@ -167,10 +167,10 @@ paths:
                     type: string
                     format: date-time
                     example: 2024-01-15T10:30:00Z
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/tasks:
     get:
@@ -233,7 +233,7 @@ paths:
             default: desc
             example: asc
       responses:
-        '200':
+        "200":
           description: Tasks retrieved successfully
           content:
             application/json:
@@ -243,7 +243,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Task'
+                      $ref: "#/components/schemas/Task"
                   meta:
                     type: object
                     properties:
@@ -259,12 +259,12 @@ paths:
                       totalPages:
                         type: integer
                         example: 3
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
     post:
       tags: [Tasks]
@@ -323,18 +323,18 @@ paths:
                   status: not-started
                   labels: [urgent, documentation]
       responses:
-        '201':
+        "201":
           description: Task created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/tasks/{taskId}:
     get:
@@ -352,20 +352,20 @@ paths:
             format: int64
             example: 12345
       responses:
-        '200':
+        "200":
           description: Task retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+                $ref: "#/components/schemas/Task"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
     patch:
       tags: [Tasks]
@@ -426,22 +426,22 @@ paths:
                   status: in-progress
                   labels: [updated, important]
       responses:
-        '200':
+        "200":
           description: Task updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+                $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
     delete:
       tags: [Tasks]
@@ -458,16 +458,16 @@ paths:
             format: int64
             example: 12345
       responses:
-        '204':
+        "204":
           description: Task deleted successfully
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/health:
     get:
@@ -477,7 +477,7 @@ paths:
       operationId: healthCheck
       security: []
       responses:
-        '200':
+        "200":
           description: System is healthy
           content:
             application/json:
@@ -498,7 +498,7 @@ paths:
                     type: string
                     enum: [connected, disconnected]
                     example: connected
-        '503':
+        "503":
           description: System is unhealthy
           content:
             application/json:
@@ -604,7 +604,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             validation_failed:
               summary: Validation error example
@@ -623,7 +623,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             missing_token:
               summary: Missing authentication token
@@ -643,7 +643,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             access_denied:
               summary: Access denied to resource
@@ -657,7 +657,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             task_not_found:
               summary: Task not found
@@ -671,7 +671,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             email_exists:
               summary: Email already registered
@@ -685,7 +685,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             internal_error:
               summary: Internal server error
