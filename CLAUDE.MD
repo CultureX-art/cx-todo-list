@@ -10,6 +10,16 @@ These conventions ensure clarity, reliability, and speed to production. They cov
 
 For folder structures, see [FOLDER\_STRUCTURE.md](./docs/FOLDER_STRUCTURE.md).
 
+### Team Scale & Resource Context
+
+**Current Team Capacity**: Small-to-medium engineering teams (2-8 developers) with limited dedicated QA resources. Code quality and type safety are critical for maintainability and reducing cognitive load.
+
+**Resource Constraints**: 
+- Limited manual testing capacity - automated type checking essential
+- Cross-functional team members may contribute code - strict guardrails required
+- Fast iteration cycles - tooling must catch issues early in development process
+- Remote/distributed team - clear documentation and self-documenting code crucial
+
 ---
 
 ## 2) Naming Conventions (JavaScript Standard)
@@ -45,6 +55,41 @@ For folder structures, see [FOLDER\_STRUCTURE.md](./docs/FOLDER_STRUCTURE.md).
 * Use Prettier and ESLint for JS/TS code.
 * CI must fail on lint, type, or formatting errors.
 * Style rules live in repo (`.eslintrc.*`, `.prettierrc`).
+
+### Type Safety Requirements
+
+**Zero Tolerance for `any` and `unknown`**:
+- `@typescript-eslint/no-explicit-any`: ERROR - no exceptions allowed
+- `@typescript-eslint/no-unsafe-*`: ERROR - all unsafe operations forbidden
+- ESLint exceptions require explicit human permission via ADR process
+- Any use of `any` or `unknown` must be replaced with specific, meaningful types
+
+**Exception Process**:
+1. Create ADR documenting why exception is needed
+2. Get explicit approval from tech lead + 1 other senior engineer  
+3. Set 30-day sunset date for removing exception
+4. Add TODO with issue link for remediation
+
+**Context Passing Requirements**:
+- All service methods must accept `ServiceContext` parameter
+- Request correlation IDs mandatory for tracing across service boundaries
+- User context must be explicitly passed, never inferred
+- Database operations must include transaction context when applicable
+
+### Code Generation & Folder Structure
+
+**AI Code Generation Context**:
+- Always reference `docs/FOLDER_STRUCTURE.md` before creating new files
+- Follow established patterns in existing modules (check 3+ similar files)
+- Maintain consistency in import paths and module organization
+- New features must follow domain-driven structure: `domain/{api,services,repositories}`
+
+**File Placement Rules**:
+- Common utilities: `src/common/{validation,error,types,database}/`
+- Domain logic: `src/{domain}/{api,services,repositories}/`
+- Configuration: `src/config/` 
+- Tests mirror src structure: `__tests__/{domain}/` 
+- Integration tests: `__tests__/integration/{api,database,services,workflows}/`
 
 ---
 
@@ -254,12 +299,43 @@ One paragraph on the problem and users.
 
 ---
 
-## 23) Exceptions
+## 23) Exceptions & ADR Process
 
-If you must diverge, open an ADR with:
+### ESLint Rule Exceptions
+
+**Process for `any`/`unknown` exceptions**:
+1. **ADR Required**: Document specific need, alternatives considered, and business justification
+2. **Human Approval**: Tech lead + 1 senior engineer must explicitly approve
+3. **Scoped Exception**: Use `eslint-disable-next-line` with comment linking to ADR issue  
+4. **Sunset Date**: 30-day maximum, with TODO and tracking issue
+5. **Remediation Plan**: Document specific steps to remove exception
+
+**ADR Template for Type Exceptions**:
+```
+# ADR-XXX: Type Safety Exception for [Component]
+
+## Context
+[Why is any/unknown needed? What specific constraint prevents proper typing?]
+
+## Decision  
+[What exception is being granted? How limited in scope?]
+
+## Consequences
+[What risks? How will we monitor? When will we remediate?]
+
+## Sunset Date
+[Must be ≤30 days from approval]
+
+## Remediation Plan
+[Specific technical steps to eliminate exception]
+```
+
+### General Divergence Process
+
+If you must diverge from any convention, open an ADR with:
 
 * Rationale & scope, risk analysis, alternative considered
-* Sunset/reeval date
+* Sunset/reeval date  
 * Owner responsible for re-alignment
 
 ---

@@ -40,7 +40,14 @@ We solve this by **embedding AI into the development workflow in a controlled, s
 - **Interface freeze at Stage 3** – no breaking changes downstream.  
 - **AI outputs are small diffs (≤150 LOC)** – easy to audit.  
 - **Manual quality gates** – lint, type-check, coverage, mutation testing, secret scan, SAST, and perf budgets.  
-- **Traceability** – every change links to prompt + rationale for auditability.  
+- **Traceability** – every change links to prompt + rationale for auditability.
+
+### Type Safety & Context Passing (Enhanced)
+- **Zero-tolerance `any`/`unknown` policy** – AI must use specific, meaningful types
+- **ESLint exceptions require human approval** – ADR process with explicit sign-off
+- **Context propagation mandatory** – all service methods accept `ServiceContext`
+- **Team scale awareness** – AI considers current team capacity (2-8 developers) and resource constraints
+- **Folder structure compliance** – AI must reference existing patterns before creating new files  
 
 This ensures AI acts as an **accelerator**, not a risk.
 
