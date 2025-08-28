@@ -29,7 +29,14 @@
     ],
 
     // Code Quality
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-unused-vars": "off",
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "error",
@@ -49,5 +56,23 @@
     "no-eval": "error",
     "no-implied-eval": "error"
   },
+  "overrides": [
+    {
+      "files": ["__tests__/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+      "rules": {
+        // Relaxed rules for test files to allow necessary testing patterns
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-types": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/strict-boolean-expressions": "off",
+        "@typescript-eslint/prefer-readonly": "off",
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        "@typescript-eslint/prefer-nullish-coalescing": "off",
+        "no-console": "off",
+        "eqeqeq": "error"
+      }
+    }
+  ],
   "ignorePatterns": ["dist/", "node_modules/", "coverage/", "*.js", "*.md"]
 }

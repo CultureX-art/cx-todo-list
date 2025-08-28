@@ -59,7 +59,7 @@ export class ValidationError extends ServiceError {
     super(message, validationDetails);
   }
 
-  protected override formatDetails(): Array<{ field: string; issue: string }> {
+  override formatDetails(): Array<{ field: string; issue: string }> {
     return this.validationDetails;
   }
 
@@ -261,7 +261,15 @@ export class InternalServiceError extends ServiceError {
  * Type guard to check if error is a service error
  */
 export const isServiceError = (
-  error: Error | ServiceError,
+  error:
+    | Error
+    | ServiceError
+    | string
+    | Record<string, never>
+    | null
+    | number
+    | string
+    | undefined,
 ): error is ServiceError => {
   return error instanceof ServiceError;
 };
@@ -270,7 +278,15 @@ export const isServiceError = (
  * Convert any error to a service error
  */
 export const toServiceError = (
-  error: Error | ServiceError | string | Record<string, never> | null,
+  error:
+    | Error
+    | ServiceError
+    | string
+    | Record<string, never>
+    | null
+    | number
+    | string
+    | undefined,
 ): ServiceError => {
   if (isServiceError(error as Error | ServiceError)) {
     return error as ServiceError;
@@ -291,7 +307,14 @@ export const toServiceError = (
  * Extract error message from any error type
  */
 export const getErrorMessage = (
-  error: Error | string | Record<string, never> | null,
+  error:
+    | Error
+    | string
+    | Record<string, never>
+    | null
+    | number
+    | string
+    | undefined,
 ): string => {
   if (error instanceof Error) {
     return error.message;
