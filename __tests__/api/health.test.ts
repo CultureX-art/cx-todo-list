@@ -45,19 +45,17 @@ describe("Health API Endpoints", () => {
     },
   };
 
-  beforeEach(() => {
-    mockHealthService = {
-      checkHealth: jest.fn(),
-      checkDetailedHealth: jest.fn(),
-      checkReadiness: jest.fn(),
-      checkLiveness: jest.fn(),
-      getSystemMetrics: jest.fn(),
-      checkDatabaseHealth: jest.fn(),
-      performMaintenance: jest.fn(),
-    } as jest.Mocked<HealthService>;
+  mockHealthService = {
+    checkHealth: jest.fn(),
+    checkDetailedHealth: jest.fn(),
+    checkReadiness: jest.fn(),
+    checkLiveness: jest.fn(),
+    getSystemMetrics: jest.fn(),
+    checkDatabaseHealth: jest.fn(),
+    performMaintenance: jest.fn(),
+  } as jest.Mocked<HealthService>;
 
-    app = new App({});
-  });
+  app = new App({});
 
   describe("GET /v1/health", () => {
     it("should return healthy status when all services are operational", async () => {

@@ -10,7 +10,7 @@
     "start": "node dist/app.js",
     "start:demo": "tsx src/server.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testPathIgnorePatterns=__tests__/integration",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testPathIgnorePatterns=__tests__/integration --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.integration.config.js",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --testPathIgnorePatterns=__tests__/integration",
     "test:coverage:all": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",

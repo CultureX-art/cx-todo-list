@@ -73,6 +73,7 @@ describe("MySQLTaskRepository", () => {
         id: insertId,
         title: createData.title,
         description: createData.description ?? null,
+        labels: JSON.stringify(createData.labels), // TEST_CASE_ERROR: Fix labels mismatch
       });
 
       mockDb.execute.mockResolvedValue([
@@ -1160,7 +1161,7 @@ describe("MySQLTaskRepository", () => {
       expect(result).toHaveLength(1);
       expect(result[0]?.title).toBe("Overdue Task");
       expect(mockDb.queryTasks).toHaveBeenCalledWith(
-        expect.stringContaining("due_date < NOW() AND status !== ?"),
+        expect.stringContaining("due_date < NOW() AND status != ?"), // TEST_CASE_ERROR: Fix SQL operator mismatch
         [userId, "done"],
       );
     });

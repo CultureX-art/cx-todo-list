@@ -10,11 +10,20 @@ Transform the finalized architecture specification from Stage 2 into concrete, d
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
 
-- **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
+- **Tech Stack**: 
+    - ***code***:
+        - ***Runtime***: Node.js, 
+        - ***Database***: MySQL, ORM: Sequelize,
+        - ***Frontend***: React (Vite)
+        - ***Languages***: JavaScript/TypeScript for backend/frontend, SQL for database
+        - ***Frameworks/Libraries***: Express for Backend, React with hooks for frontend, Jest for testing
+        - ***Infrastructure***: AWS services (Lambda, S3, RDS, CloudFront, API Gateway, VPC, LOAD Balancer, IAM, Route 53, SNS, SQS)
+        - ***DevOps***: GitHub for version control, Terraform for infrastructure as code
+        - ***Testing***: Unit tests, integration tests, end-to-end tests with Jest
+    - ***Monitoring***: CloudWatch
 - **Naming:** kebab-case files/dirs, camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
-- **Database:** snake_case tables/columns, singular table names, forward-only migrations
-- **API:** Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
-- **Logging:** JSON structured logs {level, msg, service, env, correlationId, timestamp}
+    - ***Database***: snake_case tables/columns, singular table names, forward-only migrations
+- **API**: Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
 
 ## INPUTS
 
@@ -33,166 +42,128 @@ Paste the following from Stage 2 Planning output:
 
 Create complete OpenAPI 3.0 specification with:
 
-#### REST Endpoints
-
-```yaml
-# Complete OpenAPI spec with all endpoints
-openapi: 3.0.3
-info:
-  title: [Service Name] API
-  version: 1.0.0
-  description: [Purpose and scope]
-
-paths:
-  /v1/resource:
-    post:
-      summary: Create new resource
-      operationId: createResource
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateResourceRequest'
-      responses:
-        '201':
-          description: Resource created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
-components:
-  schemas:
-    CreateResourceRequest:
-      type: object
-      required: [name, type]
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          description: Resource display name
-        type:
-          type: string
-          enum: [basic, premium, enterprise]
-          description: Resource tier type
-
-    ResourceResponse:
-      type: object
-      required: [id, name, type, createdAt]
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Unique resource identifier
-        name:
-          type: string
-          description: Resource display name
-        type:
-          type: string
-          enum: [basic, premium, enterprise]
-          description: Resource tier type
-        createdAt:
-          type: string
-          format: date-time
-          description: ISO 8601 creation timestamp
-
-  responses:
-    BadRequest:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-
-    ErrorResponse:
-      type: object
-      required: [error]
-      properties:
-        error:
-          type: object
-          required: [code, message]
-          properties:
-            code:
-              type: string
-              description: Machine-readable error code
-            message:
-              type: string
-              description: Human-readable error message
-            details:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  issue:
-                    type: string
-```
-
 #### Request/Response Type Definitions
 
 ```typescript
-// Complete TypeScript interfaces for all API contracts
+/**
+ * Standard error codes for programmatic handling
+ */
+export type ErrorCode =
+  | "validation_failed"
+  | "unauthorized"
+  | "forbidden"
+  | "not_found"
+  | "conflict"
+  | "rate_limited"
+  | "internal_error";
 
-// Request Types
-interface CreateResourceRequest<T> {
-  /** Resource */
-  resource: T;
-
-  /** Resource created by */
-  by: User;
-
-  /** Optional metadata */
-  metadata?: Record<string, unknown>;
+/**
+ * Detailed validation error information
+ */
+export interface ValidationDetail {
+  /** Field name that failed validation */
+  field: string;
+  /** Description of validation failure */
+  issue: string;
 }
 
-interface UpdateResourceRequest<T> {
-  /** Partial Resource */
-  resource: Partial<T>;
-
-  /** Resource updated by */
-  by: User;
-
-  /** Updated metadata */
-  metadata?: Record<string, unknown>;
+/**
+ * Standard API error structure
+ */
+export interface ApiError {
+  code: ErrorCode;
+  message: string;
 }
 
-interface ApiResponse {
-  transaction_id: string; // mirrors X-Request-Id / traceparent
-  message: string; // e.g., "OK", "Created", or human context
-  time_taken_ms?: number; // optional; mirrors X-Response-Time
-  data?: TData; // resource | array | null
-  meta?: TMeta;
-  error?: ApiError;
+/**
+ * Validation error structure with details
+ */
+export interface ValidationError extends ApiError {
+  details: ValidationDetail[];
 }
 
-// Error Types
-interface ApiError {
-  title: string;
-  status: number;
-  detail?: string;
-  type?: string;
-  instance?: string;
-  code?: string; // machine code
-  transaction_id?: string; // mirror header
-  time_taken_ms?: number;
-  details?: Array<{
-    message: string;
-    details?: Array<{ field: string; issue: string }>;
-  }>;
+/**
+ * Pagination metadata
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+/**
+ * Standard API response wrapper with correlation tracking
+ */
+export interface ApiResponse {
+  /** Request correlation ID for tracing */
+  correlationId: string;
+  /** Human-readable status message */
+  message: string;
+  /** Timestamp of the response in ISO 8601 format */
+  timestamp: string;
+  /** Response time in milliseconds (optional) */
+  responseTimeMs?: number;
+  /** Metadata (pagination, etc.) */
+  meta?: PaginationMeta | Record<string, string | number | boolean> | undefined;
+}
+
+/**
+ * Standard error response structure
+ */
+export interface ErrorApiResponse extends ApiResponse {
+  /** Error information */
+  errors: ApiError[];
+  /** Request path where error occurred */
+  path: string;
+}
+
+/**
+ * Success response structure
+ */
+export interface SuccessApiResponse<
+  TData = Record<string, string | number | boolean | null>,
+> extends ApiResponse {
+  /** Response data payload */
+  data: TData;
+  /** Only validation errors possible in case of success response */
+  errors?: ValidationError[];
+}
+
+/**
+ * Pagination information
+ */
+export interface PaginationInfo {
+  /** Current page number (1-based) */
+  page: number;
+  /** Number of items per page */
+  limit: number;
+  /** Total number of items */
+  total: number;
+  /** Total number of pages */
+  totalPages: number;
+}
+
+/**
+ * Paginated response structure
+ */
+export interface PaginatedResponse<
+  TData = Record<string, string | number | boolean | null>,
+> extends SuccessApiResponse<TData[]> {
+  /** Array of data items */
+  data: TData[];
+  /** Pagination information */
+  pagination: PaginationInfo;
+}
+
+/**
+ * Options for pagination
+ */
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
 }
 ```
 
@@ -278,6 +249,282 @@ interface ResourceCreationAttributes {
   type: "basic" | "premium" | "enterprise";
   metadata?: Record<string, unknown> | null;
 }
+
+export interface BaseRow {
+  id: number;
+  created_at: Date | string;
+  updated_at: Date | string;
+  deleted_at: Date | string | null;
+}
+
+export interface QueryResult {
+  insertId?: number;
+  affectedRows?: number;
+  changedRows?: number;
+  warningCount?: number;
+  message?: string;
+  protocol41?: boolean;
+}
+
+export type DatabaseQueryResult<T> = [T[], QueryResult];
+
+// ============================================================================
+// TASK TABLE TYPES
+// ============================================================================
+
+export interface TaskRow extends BaseRow {
+  user_id: number;
+  title: string;
+  description: string | null;
+  due_date: Date | string | null;
+  status: "not-started" | "in-progress" | "done";
+  labels: string; // JSON string representation
+}
+
+// TODO: requires further thought, total_count cannot be at the same level as other fields, also TasRowWithCount doesnot make sense, conider TaskRowsWithCount, it can have array of tasks and total_count, offset, limit etc
+export interface TaskRowWithCount extends TaskRow {
+  total_count?: number; // For pagination queries
+}
+
+// ============================================================================
+// USER TABLE TYPES
+// ============================================================================
+
+export interface UserRow extends BaseRow {
+  email: string;
+  password_hash: string;
+  first_name: string | null;
+  last_name: string | null;
+  is_active: boolean;
+  last_login_at: Date | string | null;
+}
+
+// ============================================================================
+// GENERIC QUERY PARAMETER TYPES
+// ============================================================================
+
+export type QueryParameter =
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined;
+export type QueryParameters = QueryParameter[];
+
+// ============================================================================
+// COUNT QUERY RESULT TYPES
+// ============================================================================
+
+export interface CountResult {
+  count: number;
+}
+
+export interface StatusCountResult {
+  status: string;
+  count: number;
+}
+
+/**
+ * User signup request payload
+ */
+export interface SignupRequest {
+  /** Valid email address for user account */
+  email: string;
+  /** Password with minimum 8 characters, at least one uppercase, lowercase, and number */
+  password: string;
+}
+
+/**
+ * User signup response
+ */
+export interface SignupResponse {
+  /** Unique user identifier */
+  id: number;
+  /** User email address */
+  email: string;
+  /** Account creation timestamp in ISO 8601 format */
+  createdAt: string;
+}
+
+/**
+ * User login request payload
+ */
+export interface LoginRequest {
+  /** Registered email address */
+  email: string;
+  /** User password */
+  password: string;
+}
+
+/**
+ * User login response with JWT token
+ */
+export interface LoginResponse {
+  /** JWT access token for authentication */
+  token: string;
+  /** Token expiration timestamp in ISO 8601 format */
+  expiresAt: string;
+  /** User profile information */
+  user: UserProfile;
+}
+
+/**
+ * User profile information
+ */
+export interface UserProfile {
+  /** Unique user identifier */
+  id: number;
+  /** User email address */
+  email: string;
+  /** Account creation timestamp in ISO 8601 format */
+  createdAt: string;
+}
+
+// ============================================================================
+// JWT TYPES
+// ============================================================================
+
+/**
+ * JWT token payload structure
+ */
+export interface JwtPayload {
+  /** User ID (subject) */
+  sub: number;
+  /** User email */
+  email: string;
+  /** Token issued at timestamp (Unix) */
+  iat: number;
+  /** Token expiration timestamp (Unix) */
+  exp: number;
+  /** JWT ID for token revocation */
+  jti: string;
+  /** Token issuer */
+  iss: string;
+  /** Token audience */
+  aud: string;
+}
+
+// ============================================================================
+// CONTEXT TYPES
+// ============================================================================
+
+/**
+ * Authenticated user context
+ */
+export interface AuthenticatedUser {
+  /** User ID from JWT token */
+  id: number;
+  /** User email from JWT token */
+  email: string;
+  /** Token jti */
+  jti: string;
+}
+
+/**
+ * Express request with authenticated user context
+ */
+export interface AuthenticatedRequest<
+  TBody = Record<string, string | number | boolean>,
+  TQuery = Record<string, string>,
+> {
+  /** Request body payload */
+  body: TBody;
+  /** Query parameters */
+  query: TQuery;
+  /** Route parameters */
+  params: Record<string, string>;
+  /** Authenticated user information */
+  user: AuthenticatedUser;
+  /** Request correlation ID */
+  correlationId: string;
+  /** Request headers */
+  headers: Record<string, string | string[]>;
+}
+
+/**
+ * Authentication middleware request extension
+ */
+export interface AuthenticatedRequestExtension {
+  /** Authenticated user context */
+  user: AuthenticatedUser;
+}
+
+
+// ============================================================================
+// MODEL ATTRIBUTES
+// ============================================================================
+
+/**
+ * User model attributes as stored in database
+ */
+export interface UserAttributes {
+  /** Primary key identifier */
+  id: number;
+  /** Unique email address */
+  email: string;
+  /** Bcrypt hashed password */
+  passwordHash: string;
+  /** Account creation timestamp */
+  createdAt: Date;
+  /** Last modification timestamp */
+  updatedAt: Date;
+  /** Soft delete timestamp (null = active) */
+  deletedAt: Date | null;
+}
+
+/**
+ * User creation attributes (excludes auto-generated fields)
+ */
+export interface UserCreationAttributes {
+  /** Unique email address */
+  email: string;
+  /** Bcrypt hashed password */
+  passwordHash: string;
+}
+
+// ============================================================================
+// QUERY FILTERS
+// ============================================================================
+
+/**
+ * User query filters for repository operations
+ */
+export interface UserFilters {
+  /** Number of items to skip (offset) */
+  offset?: number;
+  /** Maximum number of items to return */
+  limit?: number;
+  /** Filter by email pattern */
+  emailPattern?: string;
+  /** Filter by creation date range */
+  createdBefore?: Date;
+  /** Filter by creation date range */
+  createdAfter?: Date;
+  /** Include soft-deleted records */
+  includeSoftDeleted?: boolean;
+}
+
+/**
+ * Authentication event for audit logging
+ */
+export interface AuthEvent {
+  /** Event type */
+  type: "login" | "logout" | "signup" | "token_refresh" | "password_change";
+  /** User ID involved in event */
+  userId: number;
+  /** User email involved in event */
+  email: string;
+  /** Success status of the event */
+  success: boolean;
+  /** Failure reason if unsuccessful */
+  failureReason?: string;
+  /** Client IP address */
+  clientIp: string;
+  /** User agent string */
+  userAgent: string;
+}
+
 ```
 
 ### Phase 3: Service Interface Definition
@@ -285,114 +532,247 @@ interface ResourceCreationAttributes {
 Create internal service interfaces for business logic:
 
 ```typescript
-// Business logic service interfaces
 
-interface ResourceService {
+/**
+ * Database connection interface for executing queries and managing transactions
+*/
+export interface IDatabaseConnection {
+  connect(): Promise<void>;
+
+  // Task operations
+  queryTasks(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<DatabaseQueryResult<TaskRow>>;
+  queryTasksWithCount(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<DatabaseQueryResult<TaskRowWithCount>>;
+  queryTaskCount(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<DatabaseQueryResult<CountResult>>;
+  queryTaskStatusCounts(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<DatabaseQueryResult<StatusCountResult>>;
+
+  // User operations
+  queryUsers(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<DatabaseQueryResult<UserRow>>;
+
+  // Generic operations for inserts/updates/deletes
+  execute(
+    sql: string,
+    params?: QueryParameters,
+  ): Promise<[QueryResult[], QueryResult]>;
+
+  beginTransaction(): Promise<void>;
+  commit(): Promise<void>;
+  rollback(): Promise<void>;
+  ping(): Promise<{ responseTimeMs: number }>;
+  end(): Promise<void>;
+  getStats(): { active: number; idle: number; max: number };
+  isConnected(): boolean;
+}
+
+/**
+ * User repository interface for user data access
+ */
+export interface IUserRepository {
   /**
-   * Create a new resource
-   * @param request - Resource creation parameters
-   * @returns Promise resolving to created resource
-   * @throws {ValidationError} When input validation fails
-   * @throws {BusinessLogicError} When business rules are violated
+   * Create a new user in the database
+   *
+   * @param attributes - User creation data
+   * @param options - Transaction options
+   * @returns Promise resolving to created user
+   *
+   * @throws {Error} When email already exists or database error occurs
    */
-  createResource(request: CreateResourceRequest): Promise<ResourceResponse>;
+  create(
+    attributes: UserCreationAttributes,
+    options?: TransactionOptions,
+  ): Promise<UserAttributes>;
 
   /**
-   * Retrieve resource by ID
-   * @param id - Resource identifier
-   * @returns Promise resolving to resource or null if not found
-   * @throws {NotFoundError} When resource doesn't exist
+   * Find user by primary key
+   *
+   * @param id - User identifier
+   * @param options - Transaction options
+   * @returns Promise resolving to user or null if not found
    */
-  getResourceById(id: number): Promise<ResourceResponse | null>;
-
-  /**
-   * Update existing resource
-   * @param id - Resource identifier
-   * @param request - Update parameters
-   * @returns Promise resolving to updated resource
-   * @throws {NotFoundError} When resource doesn't exist
-   * @throws {ValidationError} When input validation fails
-   */
-  updateResource(
+  findByPk(
     id: number,
-    request: UpdateResourceRequest,
-  ): Promise<ResourceResponse>;
+    options?: TransactionOptions,
+  ): Promise<UserAttributes | null>;
 
   /**
-   * Soft delete resource
-   * @param id - Resource identifier
-   * @returns Promise resolving when deletion is complete
-   * @throws {NotFoundError} When resource doesn't exist
+   * Find user by email address
+   *
+   * @param email - User email address
+   * @param options - Transaction options
+   * @returns Promise resolving to user or null if not found
    */
-  deleteResource(id: number): Promise<void>;
+  findByEmail(
+    email: string,
+    options?: TransactionOptions,
+  ): Promise<UserAttributes | null>;
 
   /**
-   * List resources with pagination
-   * @param options - Query options
-   * @returns Promise resolving to paginated resource list
-   */
-  listResources(options: ResourceListOptions): Promise<ResourceListResponse>;
-}
-
-interface ResourceListOptions {
-  /** Page number (1-based) */
-  page?: number;
-  /** Items per page (default: 20, max: 100) */
-  limit?: number;
-  /** Filter by resource type */
-  type?: "basic" | "premium" | "enterprise";
-  /** Search by name (partial match) */
-  nameSearch?: string;
-  /** Sort by field */
-  sortBy?: "name" | "createdAt" | "updatedAt";
-  /** Sort direction */
-  sortOrder?: "asc" | "desc";
-}
-
-// Repository interface for data access
-interface ResourceRepository {
-  /**
-   * Create resource in database
-   * @param attributes - Resource creation attributes
-   * @returns Promise resolving to created resource model
-   */
-  create(attributes: ResourceCreationAttributes): Promise<ResourceModel>;
-
-  /**
-   * Find resource by primary key
-   * @param id - Resource identifier
-   * @returns Promise resolving to resource model or null
-   */
-  findByPk(id: number): Promise<ResourceModel | null>;
-
-  /**
-   * Update resource by primary key
-   * @param id - Resource identifier
+   * Update user by primary key
+   *
+   * @param id - User identifier
    * @param updates - Fields to update
-   * @returns Promise resolving to updated resource model
+   * @param options - Transaction options
+   * @returns Promise resolving to updated user
+   *
+   * @throws {Error} When user not found or update fails
    */
   update(
     id: number,
-    updates: Partial<ResourceCreationAttributes>,
-  ): Promise<ResourceModel>;
+    updates: Partial<UserCreationAttributes>,
+    options?: TransactionOptions,
+  ): Promise<UserAttributes>;
 
   /**
-   * Soft delete resource by primary key
-   * @param id - Resource identifier
+   * Soft delete user by primary key
+   *
+   * @param id - User identifier
+   * @param options - Transaction options
    * @returns Promise resolving when deletion is complete
+   *
+   * @throws {Error} When user not found or deletion fails
    */
-  delete(id: number): Promise<void>;
+  delete(id: number, options?: TransactionOptions): Promise<void>;
 
   /**
-   * Find resources with filtering and pagination
-   * @param options - Query options
-   * @returns Promise resolving to resources and total count
+   * Find users with filtering and pagination
+   *
+   * @param filters - Query filters and pagination options
+   * @param options - Transaction options
+   * @returns Promise resolving to paginated user results
    */
-  findAndCountAll(options: ResourceListOptions): Promise<{
-    resources: ResourceModel[];
-    total: number;
-  }>;
+  findAndCountAll(
+    filters: UserFilters,
+    options?: TransactionOptions,
+  ): Promise<PaginatedResult<UserAttributes>>;
+
+  /**
+   * Check if email address exists
+   *
+   * @param email - Email address to check
+   * @param excludeUserId - User ID to exclude from check (for updates)
+   * @param options - Transaction options
+   * @returns Promise resolving to true if email exists
+   */
+  emailExists(
+    email: string,
+    excludeUserId?: number,
+    options?: TransactionOptions,
+  ): Promise<boolean>;
 }
+
+/**
+ * Authentication service interface for user management and JWT operations
+ */
+export interface IAuthService {
+  /**
+   * Register a new user account
+   *
+   * @param request - User registration data
+   * @param context - Service execution context
+   * @returns Promise resolving to created user information
+   *
+   * @throws {ValidationError} When email format is invalid or password is weak
+   * @throws {ConflictError} When email address is already registered
+   * @throws {InternalServiceError} When user creation fails
+   */
+  signup(
+    request: SignupRequest,
+    context: ServiceContext,
+  ): Promise<SignupResponse>;
+
+  /**
+   * Authenticate user and generate JWT token
+   *
+   * @param request - Login credentials
+   * @param context - Service execution context
+   * @returns Promise resolving to authentication token and user profile
+   *
+   * @throws {ValidationError} When email or password is missing
+   * @throws {AuthenticationError} When credentials are invalid
+   * @throws {InternalServiceError} When token generation fails
+   */
+  login(request: LoginRequest, context: ServiceContext): Promise<LoginResponse>;
+
+  /**
+   * Get user profile by ID
+   *
+   * @param userId - User identifier
+   * @param context - Service execution context
+   * @returns Promise resolving to user profile or null if not found
+   *
+   * @throws {NotFoundError} When user doesn't exist
+   * @throws {InternalServiceError} When profile retrieval fails
+   */
+  getUserProfile(
+    userId: number,
+    context: ServiceContext,
+  ): Promise<UserProfile | null>;
+
+  /**
+   * Validate JWT token and extract payload
+   *
+   * @param token - JWT token to validate
+   * @param context - Service execution context
+   * @returns Promise resolving to decoded token payload
+   *
+   * @throws {AuthenticationError} When token is invalid, expired, or malformed
+   * @throws {InternalServiceError} When token validation fails
+   */
+  validateToken(token: string, context: ServiceContext): Promise<JwtPayload>;
+
+  /**
+   * Generate new JWT token for user
+   *
+   * @param userId - User identifier
+   * @param email - User email address
+   * @param context - Service execution context
+   * @returns Promise resolving to signed JWT token
+   *
+   * @throws {InternalServiceError} When token generation fails
+   */
+  generateToken(
+    userId: number,
+    email: string,
+    context: ServiceContext,
+  ): Promise<string>;
+
+  /**
+   * Revoke JWT token (add to blacklist)
+   *
+   * @param tokenId - JWT ID (jti claim)
+   * @param context - Service execution context
+   * @returns Promise resolving when token is revoked
+   *
+   * @throws {InternalServiceError} When token revocation fails
+   */
+  revokeToken(tokenId: string, context: ServiceContext): Promise<void>;
+
+  /**
+   * Check if JWT token is revoked
+   *
+   * @param tokenId - JWT ID (jti claim)
+   * @param context - Service execution context
+   * @returns Promise resolving to true if token is revoked
+   *
+   * @throws {InternalServiceError} When blacklist check fails
+   */
+  isTokenRevoked(tokenId: string, context: ServiceContext): Promise<boolean>;
+}
+
 ```
 
 ### Phase 4: Configuration Interface Definition
@@ -400,96 +780,202 @@ interface ResourceRepository {
 Define all configuration structures:
 
 ```typescript
-// Application configuration interfaces
 
-interface AppConfig {
-  /** Server configuration */
-  server: ServerConfig;
-  /** Database configuration */
-  database: DatabaseConfig;
-  /** Logging configuration */
-  logging: LoggingConfig;
-  /** Feature flags */
-  features: FeatureConfig;
-  /** External service configuration */
-  external: ExternalConfig;
-}
+/**
+ * Application environment enumeration
+ */
+export type Environment = "development" | "test" | "staging" | "production";
 
-interface ServerConfig {
-  /** Server port number */
+/**
+ * Log level enumeration
+ */
+export type LogLevel = "silly" | "debug" | "info" | "warn" | "error" | "fatal";
+
+// ============================================================================
+// MAIN APPLICATION CONFIGURATION
+// ============================================================================
+
+/**
+ * HTTP server configuration
+ */
+export interface ServerConfig {
+  /** Server port number (default: 3000) */
   port: number;
-  /** Server host binding */
+  /** Host to bind server to (default: '0.0.0.0') */
   host: string;
-  /** Environment name */
-  env: "development" | "testing" | "staging" | "production";
-  /** Request timeout in milliseconds */
-  requestTimeout: number;
-  /** Maximum request payload size */
+  /** Application environment */
+  env: Environment;
+  /** Request timeout in milliseconds (default: 30000) */
+  requestTimeoutMs: number;
+  /** Maximum request payload size (default: '10mb') */
   maxPayloadSize: string;
+  /** Enable request logging (default: true) */
+  enableRequestLogging: boolean;
+  /** Trust proxy headers (default: false) */
+  trustProxy: boolean;
 }
 
-interface DatabaseConfig {
-  /** Database host */
+/**
+ * Database connection configuration
+ */
+export interface DatabaseConfig {
+  /** Database host (default: 'localhost') */
   host: string;
-  /** Database port */
+  /** Database port (default: 3306 for MySQL) */
   port: number;
   /** Database name */
   database: string;
   /** Database username */
   username: string;
-  /** Database password (from secret manager) */
+  /** Database password */
   password: string;
   /** Connection pool configuration */
   pool: {
-    /** Maximum number of connections */
+    /** Maximum number of connections in pool (default: 10) */
     max: number;
-    /** Minimum number of connections */
+    /** Minimum number of connections in pool (default: 2) */
     min: number;
-    /** Connection idle timeout */
-    idle: number;
-    /** Connection acquire timeout */
-    acquire: number;
+    /** Connection idle timeout in milliseconds (default: 30000) */
+    idleTimeoutMs: number;
+    /** Connection acquire timeout in milliseconds (default: 60000) */
+    acquireTimeoutMs: number;
   };
-  /** Query logging enabled */
+  /** Enable query logging (default: false for production) */
   logging: boolean;
 }
 
-interface LoggingConfig {
-  /** Log level */
-  level: "debug" | "info" | "warn" | "error" | "fatal";
-  /** Log format */
-  format: "json" | "text";
+/**
+ * Authentication and JWT configuration
+ */
+export interface AuthConfig {
+  /** JWT configuration */
+  jwt: {
+    /** JWT signing secret */
+    secret: string;
+    /** JWT signing algorithm (default: 'HS256') */
+    algorithm: "HS256" | "HS384" | "HS512";
+    /** Token expiration time (default: '1h') */
+    expiresIn: string;
+    /** Token issuer (default: 'todo-api') */
+    issuer: string;
+    /** Token audience (default: 'todo-app') */
+    audience: string;
+  };
+  /** Password hashing configuration */
+  password: {
+    /** Bcrypt salt rounds (default: 12) */
+    saltRounds: number;
+  };
+}
+
+/**
+ * Logging configuration
+ */
+export interface LoggingConfig {
+  /** Log level (default: 'info') */
+  level: LogLevel;
   /** Service name for structured logs */
   service: string;
-  /** Correlation ID header name */
+  /** Application version for logs */
+  version: string;
+  /** Correlation ID header name (default: 'x-correlation-id') */
   correlationIdHeader: string;
 }
 
-interface FeatureConfig {
-  /** Resource creation enabled */
-  resourceCreationEnabled: boolean;
-  /** Advanced resource types enabled */
-  advancedResourceTypesEnabled: boolean;
-  /** Metadata storage enabled */
-  metadataStorageEnabled: boolean;
+/**
+ * Feature flags configuration
+ */
+export interface FeatureConfig {
+  /** Task creation feature enabled (default: true) */
+  taskCreationEnabled: boolean;
+  /** Task search feature enabled (default: true) */
+  taskSearchEnabled: boolean;
+  /** Task labels feature enabled (default: true) */
+  taskLabelsEnabled: boolean;
+  /** Bulk task operations enabled (default: false) */
+  bulkOperationsEnabled: boolean;
+  /** API documentation enabled (default: true for development) */
+  apiDocsEnabled: boolean;
+  /** Health check endpoints enabled (default: true) */
+  healthCheckEnabled: boolean;
 }
 
-interface ExternalConfig {
-  /** Third-party service configurations */
-  [serviceName: string]: {
-    /** Service base URL */
-    baseUrl: string;
-    /** API key (from secret manager) */
-    apiKey: string;
-    /** Request timeout */
-    timeout: number;
-    /** Retry configuration */
-    retry: {
-      attempts: number;
-      delay: number;
-    };
-  };
+// ============================================================================
+// ENVIRONMENT VARIABLE MAPPING
+// ============================================================================
+
+/**
+ * Environment variable mapping interface
+ */
+export interface EnvironmentVariables {
+  // Server
+  PORT?: string;
+  HOST?: string;
+  NODE_ENV?: string;
+  REQUEST_TIMEOUT?: string;
+  MAX_PAYLOAD_SIZE?: string;
+
+  // Database
+  DB_HOST?: string;
+  DB_PORT?: string;
+  DB_NAME?: string;
+  DB_USERNAME?: string;
+  DB_PASSWORD?: string;
+  DB_POOL_MAX?: string;
+  DB_POOL_MIN?: string;
+
+  // Authentication
+  JWT_SECRET?: string;
+  JWT_EXPIRES_IN?: string;
+  JWT_ISSUER?: string;
+  JWT_AUDIENCE?: string;
+  PASSWORD_SALT_ROUNDS?: string;
+
+  // Logging
+  LOG_LEVEL?: string;
+  LOG_SERVICE?: string;
+
+  // Features
+  FEATURE_TASK_CREATION?: string;
+  FEATURE_TASK_SEARCH?: string;
+  FEATURE_BULK_OPERATIONS?: string;
+  FEATURE_AUDIT_LOGGING?: string;
 }
+
+/**
+ * Complete application configuration
+ */
+export interface AppConfig {
+  readonly nodeEnv: "development" | "test" | "staging" | "production";
+  readonly port: number;
+  readonly allowedOrigins: string[];
+  readonly version: string;
+  readonly rateLimitWindow: number;
+  readonly rateLimitMax: number;
+  readonly server: ServerConfig;
+  readonly database: DatabaseConfig;
+  readonly auth: AuthConfig;
+  readonly logging: LoggingConfig;
+  readonly features: FeatureConfig;
+}
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+/**
+ * Type guard to check if environment is valid
+ */
+export const isValidEnvironment = (env: string): env is Environment => {
+  return ["development", "testing", "staging", "production"].includes(env);
+};
+
+/**
+ * Type guard to check if log level is valid
+ */
+export const isValidLogLevel = (level: string): level is LogLevel => {
+  return ["debug", "info", "warn", "error", "fatal"].includes(level);
+};
 ```
 
 ### Phase 5: Vendor Integration Interfaces
@@ -576,7 +1062,7 @@ interface S3UploadResult {
 
 ### Security Compliance
 
-- [ ] No sensitive data in interface examples
+- [ ] No sensitive data in examples
 - [ ] Input validation constraints defined
 - [ ] Authentication/authorization requirements documented
 - [ ] Rate limiting specifications included

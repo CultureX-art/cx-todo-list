@@ -234,13 +234,16 @@ describe("Common API Types", () => {
 
         // Assert
         expect(response).toEqual({
-          error: {
-            code,
-            message,
-          },
+          errors: [
+            {
+              code,
+              message,
+            },
+          ],
           correlationId,
           timestamp: expect.any(String),
           path,
+          message,
         });
 
         expect(new Date(response.timestamp)).toBeInstanceOf(Date);
@@ -267,7 +270,7 @@ describe("Common API Types", () => {
         );
 
         // Assert
-        expect(response.error.details).toEqual(details);
+        expect(response.errors[0].details).toEqual(details);
       });
 
       it("should handle empty validation details", () => {
@@ -287,7 +290,7 @@ describe("Common API Types", () => {
         );
 
         // Assert
-        expect(response.error.details).toEqual([]);
+        expect(response.errors[0].details).toEqual([]);
       });
     });
 
@@ -516,15 +519,16 @@ describe("Common API Types", () => {
       );
 
       // Act & Assert
-      expect(response).toHaveProperty("error");
+      expect(response).toHaveProperty("errors");
       expect(response).toHaveProperty("correlationId");
       expect(response).toHaveProperty("timestamp");
       expect(response).toHaveProperty("path");
 
-      expect(response.error).toHaveProperty("code");
-      expect(response.error).toHaveProperty("message");
-      expect(typeof response.error.code).toBe("string");
-      expect(typeof response.error.message).toBe("string");
+      expect(response.errors).toBeInstanceOf(Array);
+      expect(response.errors[0]).toHaveProperty("code");
+      expect(response.errors[0]).toHaveProperty("message");
+      expect(typeof response.errors[0].code).toBe("string");
+      expect(typeof response.errors[0].message).toBe("string");
     });
 
     it("should validate paginated response structure", () => {

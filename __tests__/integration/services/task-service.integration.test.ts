@@ -7,7 +7,7 @@
 
 import { IntegrationTestEnvironment } from "../setup/test-environment";
 import { TaskService } from "../../../src/task/services/task.service";
-import { TaskRepository } from "../../../src/task/repositories/task.repository";
+import { ITaskRepository } from "../../../src/task/repositories/task.repository";
 import { DatabaseConnection } from "../../../src/common/database/connection";
 import { ServiceContext } from "../../../src/common/types/service";
 import {
@@ -26,7 +26,7 @@ import {
 describe.skip("Task Service Integration", () => {
   let testEnv: IntegrationTestEnvironment;
   let service: TaskService;
-  let repository: TaskRepository;
+  let repository: ITaskRepository;
   let database: DatabaseConnection;
   let testUser: { id: number; email: string };
   let context: ServiceContext;

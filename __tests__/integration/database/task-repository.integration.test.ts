@@ -6,7 +6,7 @@
  */
 
 import { IntegrationTestEnvironment } from "../setup/test-environment";
-import { TaskRepository } from "../../../src/task/repositories/task.repository";
+import { ITaskRepository } from "../../../src/task/repositories/task.repository";
 import { DatabaseConnection } from "../../../src/common/database/connection";
 import { TaskStatus } from "../../../src/task/api/types";
 // import { jest } from '@jest/globals';
@@ -14,7 +14,7 @@ import { TaskStatus } from "../../../src/task/api/types";
 describe.skip("Task Repository Database Integration", () => {
   let testEnv: IntegrationTestEnvironment;
   let database: DatabaseConnection;
-  let repository: TaskRepository;
+  let repository: ITaskRepository;
   let testUserId: number;
 
   beforeAll(async () => {

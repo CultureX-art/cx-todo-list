@@ -1,4 +1,3 @@
-// @ts-nocheck - Temporarily disabled for compilation issues
 /**
  * Auth API Endpoint Tests
  *
@@ -16,26 +15,26 @@ import {
   LoginResponse,
   UserProfile,
 } from "../../src/auth/api/types";
-// import { TestFixtures } from '../helpers/test-fixtures';
-// import { ApiTestHelpers } from '../helpers/api-test-helpers';
+import {
+  ConflictError,
+  AuthenticationError,
+} from "../../src/common/error/service-error";
 
 describe("Auth API Endpoints", () => {
   let app: App;
   let mockAuthService: jest.Mocked<IAuthService>;
 
-  beforeEach(() => {
-    mockAuthService = {
-      signup: jest.fn(),
-      login: jest.fn(),
-      getUserProfile: jest.fn(),
-      validateToken: jest.fn(),
-      generateToken: jest.fn(),
-      revokeToken: jest.fn(),
-      isTokenRevoked: jest.fn(),
-    } as jest.Mocked<IAuthService>;
+  mockAuthService = {
+    signup: jest.fn(),
+    login: jest.fn(),
+    getUserProfile: jest.fn(),
+    validateToken: jest.fn(),
+    generateToken: jest.fn(),
+    revokeToken: jest.fn(),
+    isTokenRevoked: jest.fn(),
+  } as jest.Mocked<IAuthService>;
 
-    app = new App({ authService: mockAuthService });
-  });
+  app = new App();
 
   describe("POST /v1/auth/signup", () => {
     const validSignupRequest: SignupRequest = {
@@ -79,9 +78,7 @@ describe("Auth API Endpoints", () => {
     it("should return 409 for duplicate email", async () => {
       // Arrange
       mockAuthService.signup.mockRejectedValue(
-        new (require("../../src/common/error/service-error").ConflictError)(
-          "Email address is already registered",
-        ),
+        new ConflictError("Email address is already registered"),
       );
 
       // Act
@@ -235,9 +232,7 @@ describe("Auth API Endpoints", () => {
     it("should return 401 for invalid credentials", async () => {
       // Arrange
       mockAuthService.login.mockRejectedValue(
-        new (require("../../src/common/error/service-error").AuthenticationError)(
-          "Invalid email or password",
-        ),
+        new AuthenticationError("Invalid email or password"),
       );
 
       // Act
@@ -350,9 +345,7 @@ describe("Auth API Endpoints", () => {
     it("should return 401 for invalid token", async () => {
       // Arrange
       mockAuthService.validateToken.mockRejectedValue(
-        new (require("../../src/common/error/service-error").AuthenticationError)(
-          "Invalid or expired authentication token",
-        ),
+        new AuthenticationError("Invalid or expired authentication token"),
       );
 
       // Act
@@ -374,9 +367,7 @@ describe("Auth API Endpoints", () => {
     it("should return 401 for expired token", async () => {
       // Arrange
       mockAuthService.validateToken.mockRejectedValue(
-        new (require("../../src/common/error/service-error").AuthenticationError)(
-          "Token has expired",
-        ),
+        new AuthenticationError("Token has expired"),
       );
 
       // Act
@@ -423,9 +414,7 @@ describe("Auth API Endpoints", () => {
       };
 
       mockAuthService.login.mockRejectedValue(
-        new (require("../../src/common/error/service-error").AuthenticationError)(
-          "Invalid email or password",
-        ),
+        new AuthenticationError("Invalid email or password"),
       );
 
       // Act - Make multiple failed login attempts
@@ -438,9 +427,9 @@ describe("Auth API Endpoints", () => {
       // Assert - Last request should be rate limited
       const lastResponse = responses[responses.length - 1];
       if (lastResponse && lastResponse.status === "fulfilled") {
-        expect((lastResponse as PromiseFulfilledResult).value.status).toBe(429);
+        expect((lastResponse as PromiseFulfilledResult<request.Response>).value.status).toBe(429);
         expect(
-          (lastResponse as PromiseFulfilledResult).value.body.error.code,
+          (lastResponse as PromiseFulfilledResult<request.Response>).value.body.error.code,
         ).toBe("rate_limited");
       }
     });

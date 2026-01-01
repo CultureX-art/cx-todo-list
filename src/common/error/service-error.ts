@@ -96,6 +96,10 @@ export class AuthenticationError extends ServiceError {
     return new AuthenticationError("Invalid or malformed token");
   }
 
+  static invalidToken(): AuthenticationError {
+    return new AuthenticationError("Invalid token");
+  }
+
   static tokenRevoked(): AuthenticationError {
     return new AuthenticationError("Token has been revoked");
   }

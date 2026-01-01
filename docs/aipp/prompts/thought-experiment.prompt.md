@@ -10,10 +10,20 @@ Generate 3-5 different architectural options for the given feature/requirement. 
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
 
-- **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
+- **Tech Stack**: 
+    - ***code***:
+        - ***Runtime***: Node.js, 
+        - ***Database***: MySQL, ORM: Sequelize,
+        - ***Frontend***: React (Vite)
+        - ***Languages***: JavaScript/TypeScript for backend/frontend, SQL for database
+        - ***Frameworks/Libraries***: Express for Backend, React with hooks for frontend, Jest for testing
+        - ***Infrastructure***: AWS services (Lambda, S3, RDS, CloudFront, API Gateway, VPC, LOAD Balancer, IAM, Route 53, SNS, SQS)
+        - ***DevOps***: GitHub for version control, Terraform for infrastructure as code
+        - ***Testing***: Unit tests, integration tests, end-to-end tests with Jest
+    - ***Monitoring***: CloudWatch
 - **Naming:** kebab-case files/dirs, camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
-- **Database:** snake_case tables/columns, singular table names, forward-only migrations
-- **API:** Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
+    - ***Database***: snake_case tables/columns, singular table names, forward-only migrations
+- **API**: Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
 
 ## INPUTS
 

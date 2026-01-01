@@ -10,7 +10,7 @@ import { Application } from "express";
 import { IntegrationTestEnvironment } from "../setup/test-environment";
 import { createApp } from "../../../src/app";
 import { DatabaseConnection } from "../../../src/common/database/connection";
-import { TaskRepository } from "../../../src/task/repositories/task.repository";
+import { MySQLTaskRepository } from "../../../src/task/repositories/task.repository.impl";
 import { TaskServiceImpl } from "../../../src/task/services/task.service.impl";
 // import { jest } from '@jest/globals';
 
@@ -26,7 +26,7 @@ describe.skip("Task API Integration", () => {
     database = testEnv.getDatabase();
 
     // Initialize app with test database
-    const taskRepository = new TaskRepository(database);
+    const taskRepository = new MySQLTaskRepository(database);
     const taskService = new TaskServiceImpl(taskRepository);
 
     app = createApp({
@@ -40,7 +40,7 @@ describe.skip("Task API Integration", () => {
     await testEnv.teardown();
   });
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await testEnv.cleanupTestData();
     testUser = await testEnv.createTestUser("api.test@example.com");
     authToken = await testEnv.generateAuthToken(testUser.id, testUser.email);

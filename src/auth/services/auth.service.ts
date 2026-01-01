@@ -14,6 +14,9 @@ import type {
 } from "../api/types";
 import type { ServiceContext } from "../../common/types/service";
 
+// Export the implementation for tests
+export { AuthServiceImpl } from "./auth.service.impl";
+
 // ============================================================================
 // SERVICE INTERFACE
 // ============================================================================

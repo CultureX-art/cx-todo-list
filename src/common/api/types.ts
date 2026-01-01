@@ -68,7 +68,7 @@ export interface ApiResponse {
   /** Response time in milliseconds (optional) */
   responseTimeMs?: number;
   /** Metadata (pagination, etc.) */
-  meta?: PaginationMeta | Record<string, string | number | boolean>;
+  meta?: PaginationMeta | Record<string, string | number | boolean> | undefined;
 }
 
 /**
@@ -117,6 +117,16 @@ export interface PaginatedResponse<
   data: TData[];
   /** Pagination information */
   pagination: PaginationInfo;
+}
+
+/**
+ * Options for pagination
+ */
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
 }
 
 // ============================================================================

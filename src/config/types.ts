@@ -12,7 +12,7 @@
 /**
  * Application environment enumeration
  */
-export type Environment = "development" | "testing" | "staging" | "production";
+export type Environment = "development" | "test" | "staging" | "production";
 
 /**
  * Log level enumeration
@@ -174,16 +174,17 @@ export interface EnvironmentVariables {
  * Complete application configuration
  */
 export interface AppConfig {
-  /** Server configuration */
-  server: ServerConfig;
-  /** Database configuration */
-  database: DatabaseConfig;
-  /** Authentication configuration */
-  auth: AuthConfig;
-  /** Logging configuration */
-  logging: LoggingConfig;
-  /** Feature flags configuration */
-  features: FeatureConfig;
+  readonly nodeEnv: "development" | "test" | "staging" | "production";
+  readonly port: number;
+  readonly allowedOrigins: string[];
+  readonly version: string;
+  readonly rateLimitWindow: number;
+  readonly rateLimitMax: number;
+  readonly server: ServerConfig;
+  readonly database: DatabaseConfig;
+  readonly auth: AuthConfig;
+  readonly logging: LoggingConfig;
+  readonly features: FeatureConfig;
 }
 
 // ============================================================================

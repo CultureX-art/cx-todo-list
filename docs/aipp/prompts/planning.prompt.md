@@ -10,11 +10,20 @@ Take the architectural options from planning phase and conduct rigorous thought 
 
 ## STACK CONSTRAINTS (NON-NEGOTIABLE)
 
-- **Tech Stack:** Node.js (Express), MySQL (Sequelize), React (Vite), AWS via Terraform
+- **Tech Stack**: 
+    - ***code***:
+        - ***Runtime***: Node.js, 
+        - ***Database***: MySQL, ORM: Sequelize,
+        - ***Frontend***: React (Vite)
+        - ***Languages***: JavaScript/TypeScript for backend/frontend, SQL for database
+        - ***Frameworks/Libraries***: Express for Backend, React with hooks for frontend, Jest for testing
+        - ***Infrastructure***: AWS services (Lambda, S3, RDS, CloudFront, API Gateway, VPC, LOAD Balancer, IAM, Route 53, SNS, SQS)
+        - ***DevOps***: GitHub for version control, Terraform for infrastructure as code
+        - ***Testing***: Unit tests, integration tests, end-to-end tests with Jest
+    - ***Monitoring***: CloudWatch
 - **Naming:** kebab-case files/dirs, camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
-- **Database:** snake_case tables/columns, singular table names, forward-only migrations
-- **API:** Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
-- **Logging:** JSON structured logs {level, msg, service, env, correlationId, timestamp}
+    - ***Database***: snake_case tables/columns, singular table names, forward-only migrations
+- **API**: Versioned (/v1/), backward-compatible, OpenAPI specs, standardized errors
 
 ## INPUTS
 
@@ -216,12 +225,6 @@ const featureFlags = {
 
 [Error taxonomy and response patterns]
 
-## Implementation Roadmap
-
-- **Phase 1:** [Deliverables and timeline]
-- **Phase 2:** [Deliverables and timeline]
-- **Phase 3:** [Deliverables and timeline]
-
 ## Risk Mitigation
 
 - **Technical Risks:** [Identified risks and mitigation strategies]
@@ -249,6 +252,5 @@ const featureFlags = {
 - [ ] Architecture handles all failure scenarios gracefully
 - [ ] Performance budgets are realistic and measurable
 - [ ] Security boundaries are clearly defined
-- [ ] Implementation is feasible within timeline
 - [ ] Operational procedures are complete
 - [ ] All guardrails and constraints are satisfied

@@ -1,81 +1,23 @@
-/**
- * Task Repository Implementation
- *
- * Concrete implementation of TaskRepository interface with MySQL database operations.
- */
+import { Task } from '../models/task';
+import { CreateTaskRequest, UpdateTaskRequest } from '../dto/task.dto';
+import { PaginatedResponse, PaginationOptions } from '../../common/api/types';
 
-import { Task, TaskStatus } from "../api/types.js";
+export interface TaskCreateData extends CreateTaskRequest {
+  userId: number;
+}
 
-export interface TaskFilterOptions {
-  page?: number;
-  limit?: number;
-  status?: TaskStatus;
-  labels?: string[];
+export interface TaskUpdateData extends UpdateTaskRequest {}
+
+export interface TaskFilterOptions extends PaginationOptions {
+  userId: number;
+  status?: string;
   search?: string;
-  sortBy?: "createdAt" | "updatedAt" | "dueDate" | "title" | "status";
-  sortOrder?: "asc" | "desc";
-}
-
-export interface TaskUpdateData {
-  title?: string;
-  description?: string | null;
-  status?: TaskStatus;
-  dueDate?: Date | null;
-  labels?: string[];
-}
-
-export interface TaskCreateData {
-  title: string;
-  description?: string | null;
-  status?: TaskStatus;
-  dueDate?: Date | null;
-  labels?: string[];
-}
-
-export interface TasksWithTotal {
-  tasks: Task[];
-  total: number;
 }
 
 export interface ITaskRepository {
-  create(userId: number, data: TaskCreateData): Promise<Task>;
-
-  findById(userId: number, id: number): Promise<Task | null>;
-
-  findByUserId(userId: number): Promise<Task[]>;
-
-  findWithFilters(
-    userId: number,
-    options: TaskFilterOptions,
-  ): Promise<TasksWithTotal>;
-
-  update(
-    userId: number,
-    id: number,
-    data: TaskUpdateData,
-  ): Promise<Task | null>;
-
-  delete(userId: number, id: number): Promise<void>;
-
-  exists(userId: number, id: number): Promise<boolean>;
-
-  search(userId: number, query: string): Promise<Task[]>;
-
-  findByLabels(userId: number, labels: string[]): Promise<Task[]>;
-
-  bulkUpdate(
-    userId: number,
-    taskIds: number[],
-    data: TaskUpdateData,
-  ): Promise<Task[]>;
-
-  bulkDelete(userId: number, taskIds: number[]): Promise<void>;
-
-  countUserTasks(
-    userId: number,
-  ): Promise<Array<{ status: TaskStatus; count: number }>>;
-
-  findDueSoon(userId: number, hours: number): Promise<Task[]>;
-
-  findOverdue(userId: number): Promise<Task[]>;
+  create(data: TaskCreateData): Promise<Task>;
+  findByPk(id: number): Promise<Task | null>;
+  update(id: number, data: TaskUpdateData): Promise<Task | null>;
+  delete(id: number): Promise<boolean>;
+  findAndCountAll(options: TaskFilterOptions): Promise<PaginatedResponse<Task>>;
 }
